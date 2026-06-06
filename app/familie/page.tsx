@@ -2,18 +2,51 @@ import AppNav from "@/components/AppNav";
 
 export default function FamiliePage() {
   const members = [
-    { name: "Steven", role: "Papa", xp: 120, level: 3, icon: "👨" },
-    { name: "Kind 1", role: "Kind", xp: 80, level: 2, icon: "🧒" },
-    { name: "Kind 2", role: "Kind", xp: 60, level: 2, icon: "👧" },
+    {
+      name: "Steven",
+      role: "Papa",
+      xp: 120,
+      level: 3,
+      icon: "👨",
+    },
+    {
+      name: "Kind 1",
+      role: "Kind",
+      xp: 80,
+      level: 2,
+      icon: "🧒",
+    },
+    {
+      name: "Kind 2",
+      role: "Kind",
+      xp: 60,
+      level: 2,
+      icon: "👧",
+    },
   ];
 
   return (
     <main className="min-h-screen bg-[#F6F7FB] p-6 pb-28 text-gray-900">
       <div className="max-w-md mx-auto">
-        <div className="mb-6">
-          <p className="text-gray-500 font-medium">Familie Gunkel</p>
-          <h1 className="text-3xl font-black">Familie</h1>
-          <p className="text-sm text-gray-500">Alle Familienhelden auf einen Blick.</p>
+
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <p className="text-gray-500 font-medium">
+              Familie Gunkel
+            </p>
+
+            <h1 className="text-3xl font-black">
+              Familie
+            </h1>
+
+            <p className="text-sm text-gray-500">
+              Alle Familienhelden auf einen Blick.
+            </p>
+          </div>
+
+          <button className="bg-white px-4 py-2 rounded-2xl shadow font-bold text-sm">
+            ➕ Mitglied
+          </button>
         </div>
 
         <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-[2rem] p-6 text-white shadow-xl mb-5">
@@ -23,8 +56,13 @@ export default function FamiliePage() {
             </div>
 
             <div>
-              <h2 className="text-2xl font-black">3 Mitglieder</h2>
-              <p className="text-white/80 mt-1">Gemeinsam 260 XP gesammelt</p>
+              <h2 className="text-2xl font-black">
+                3 Mitglieder
+              </h2>
+
+              <p className="text-white/80 mt-1">
+                Gemeinsam 260 XP gesammelt
+              </p>
             </div>
           </div>
         </div>
@@ -41,18 +79,29 @@ export default function FamiliePage() {
                 </div>
 
                 <div className="flex-1">
-                  <h2 className="font-black text-lg">{member.name}</h2>
-                  <p className="text-gray-500 text-sm">{member.role}</p>
+                  <h2 className="font-black text-lg">
+                    {member.name}
+                  </h2>
+
+                  <p className="text-gray-500 text-sm">
+                    {member.role}
+                  </p>
                 </div>
 
                 <div className="text-right">
-                  <p className="font-black text-blue-600">{member.xp} XP</p>
-                  <p className="text-xs text-gray-500">Level {member.level}</p>
+                  <p className="font-black text-blue-600">
+                    {member.xp} XP
+                  </p>
+
+                  <p className="text-xs text-gray-500">
+                    Level {member.level}
+                  </p>
                 </div>
               </div>
             </div>
           ))}
         </div>
+
       </div>
 
       <AppNav />
