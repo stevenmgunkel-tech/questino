@@ -84,7 +84,7 @@ export default function Home() {
             { href: "/missionen", icon: "➕", label: "Mission" },
             { href: "/kalender", icon: "📅", label: "Termin" },
             { href: "/einkaufsliste", icon: "🛒", label: "Einkauf" },
-            { href: "/belohnungen", icon: "🎁", label: "Reward" },
+            { href: "/familienkueche", icon: "🍽️", label: "Küche" },
           ].map((item) => (
             <a
               key={item.label}
@@ -141,43 +141,69 @@ export default function Home() {
             <div className="bg-green-50 text-green-700 rounded-2xl p-3 font-black text-sm">
               ✅ Termine vorschlagen
             </div>
+
+            <div className="bg-orange-50 text-orange-700 rounded-2xl p-3 font-black text-sm">
+              ✅ Abendessen vorschlagen
+            </div>
           </div>
         </div>
 
         <div className="bg-white rounded-3xl p-5 shadow">
-          <h2 className="text-xl font-black mb-4">📢 Aktivitäten</h2>
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-xl font-black">📢 Familienfeed</h2>
+              <p className="text-sm text-gray-500">
+                Was heute in eurer Familie passiert ist.
+              </p>
+            </div>
+
+            <span className="bg-blue-100 text-blue-700 text-xs font-black px-3 py-1 rounded-full">
+              Live
+            </span>
+          </div>
 
           <div className="space-y-4">
             {[
               {
+                icon: "🍕",
+                text: "Kind 1 schlug Pizza zum Abendessen vor",
+                detail: "+5 XP bei Genehmigung",
+                time: "Heute · 16:20",
+                color: "bg-orange-100",
+              },
+              {
                 icon: "⭐",
                 text: "Kind 1 erhielt 10 XP",
+                detail: "Zimmer aufräumen genehmigt",
                 time: "Heute · 09:15",
                 color: "bg-blue-100",
               },
               {
                 icon: "🛒",
-                text: "Milch wurde hinzugefügt",
+                text: "Schokolade wurde vorgeschlagen",
+                detail: "Wartet auf Freigabe",
                 time: "Heute · 08:40",
-                color: "bg-green-100",
+                color: "bg-yellow-100",
               },
               {
                 icon: "📅",
                 text: "Fußballtraining eingetragen",
+                detail: "Kalender · Kind 2",
                 time: "Heute · 07:50",
                 color: "bg-purple-100",
               },
             ].map((item) => (
               <div key={item.text} className="flex gap-3">
                 <div
-                  className={`w-10 h-10 rounded-2xl ${item.color} flex items-center justify-center`}
+                  className={`w-11 h-11 rounded-2xl ${item.color} flex items-center justify-center text-xl shrink-0`}
                 >
                   {item.icon}
                 </div>
 
-                <div>
-                  <p className="font-bold">{item.text}</p>
-                  <p className="text-xs text-gray-400">{item.time}</p>
+                <div className="flex-1">
+                  <p className="font-black leading-tight">{item.text}</p>
+                  <p className="text-sm text-gray-500 mt-1">{item.detail}</p>
+                  <p className="text-xs text-gray-400 mt-1">{item.time}</p>
                 </div>
               </div>
             ))}
