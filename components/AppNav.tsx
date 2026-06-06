@@ -16,25 +16,29 @@ export default function AppNav() {
   ];
 
   return (
-    <nav className="fixed bottom-4 left-0 right-0 px-4 z-50">
-      <div className="max-w-md mx-auto">
-        <div className="grid grid-cols-6 gap-1 rounded-[2rem] bg-white/90 backdrop-blur-xl p-2 shadow-2xl border border-white/70">
+    <nav className="fixed bottom-3 left-0 right-0 z-50 px-3">
+      <div className="mx-auto max-w-md">
+        <div className="grid grid-cols-6 gap-1 rounded-[2rem] border border-white/80 bg-white/90 p-2 shadow-2xl backdrop-blur-xl">
           {navItems.map((item) => {
-            const active = pathname === item.href;
+            const active =
+              pathname === item.href ||
+              (item.href !== "/" && pathname.startsWith(item.href));
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex flex-col items-center justify-center rounded-2xl py-2 transition-all ${
+                className={`flex min-w-0 flex-col items-center justify-center rounded-2xl px-1 py-2 transition-all duration-200 ${
                   active
-                    ? "bg-blue-600 text-white shadow-lg scale-105"
-                    : "text-gray-400 hover:bg-gray-100"
+                    ? "scale-105 bg-gradient-to-br from-blue-600 to-purple-600 text-white shadow-lg"
+                    : "text-gray-400 hover:bg-gray-100 hover:text-gray-700"
                 }`}
               >
-                <span className="text-xl leading-none">{item.icon}</span>
+                <span className="text-lg leading-none sm:text-xl">
+                  {item.icon}
+                </span>
 
-                <span className="mt-1 text-[10px] font-black leading-none">
+                <span className="mt-1 max-w-full truncate text-[9px] font-black leading-none sm:text-[10px]">
                   {item.label}
                 </span>
               </Link>
