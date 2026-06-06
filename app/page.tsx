@@ -2,173 +2,140 @@ import AppNav from "@/components/AppNav";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-100 to-purple-100 p-6 pb-28">
+    <main className="min-h-screen bg-[#F6F7FB] p-6 pb-28 text-gray-900">
       <div className="max-w-md mx-auto">
-        <h1 className="text-5xl font-bold text-center mb-2">🚀 Questino</h1>
-        <div className="flex gap-3 justify-center mb-6">
-  <a
-    href="/"
-    className="bg-blue-600 text-white px-4 py-2 rounded-2xl font-bold"
-  >
-    🧒 Kind-Modus
-  </a>
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <p className="text-gray-500 font-medium">Guten Tag 👋</p>
+            <h1 className="text-3xl font-black">Questino</h1>
+            <p className="text-sm text-gray-500">Familie Gunkel</p>
+          </div>
 
-  <a
-    href="/eltern"
-    className="bg-purple-600 text-white px-4 py-2 rounded-2xl font-bold"
-  >
-    👨 Eltern-Modus
-  </a>
-</div>
-        <p className="text-center text-gray-600 mb-8">
-          Aufgaben werden Abenteuer
-        </p>
+          <a
+            href="/eltern"
+            className="bg-white px-4 py-2 rounded-2xl shadow font-bold text-sm"
+          >
+            👨 Eltern
+          </a>
+        </div>
 
-        <div className="bg-white rounded-3xl p-6 shadow mb-4">
-          <p className="text-gray-800">Willkommen zurück</p>
-          <h2 className="text-2xl font-bold">Steven Familie</h2>
-
-          <div className="mt-4">
-            <p className="font-bold mb-2">⭐ Level 3 Held</p>
-            <div className="w-full bg-gray-200 rounded-full h-4">
-              <div className="bg-blue-600 h-4 rounded-full w-4/5"></div>
+        <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-[2rem] p-6 shadow-xl text-white mb-5">
+          <div className="flex justify-between items-start mb-6">
+            <div>
+              <p className="text-white/80">Aktueller Rang</p>
+              <h2 className="text-2xl font-black">Level 3 – Planer</h2>
             </div>
-            <p className="text-sm text-gray-800 mt-1">120 / 150 XP</p>
+            <span className="text-4xl">⭐</span>
+          </div>
+
+          <div className="flex justify-center my-6">
+            <div className="relative w-40 h-40">
+              <div
+                className="absolute inset-0 rounded-full"
+                style={{
+                  background:
+                    "conic-gradient(white 0deg 288deg, rgba(255,255,255,0.25) 288deg 360deg)",
+                }}
+              />
+
+              <div className="absolute inset-[14px] rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
+                <div className="text-center">
+                  <p className="text-4xl font-black">120</p>
+                  <p className="text-white/80 font-bold">XP</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p className="text-sm text-white/80 mb-2">120 / 150 XP</p>
+          <div className="w-full bg-white/25 rounded-full h-3">
+            <div className="bg-white h-3 rounded-full w-4/5"></div>
+          </div>
+
+          <p className="mt-4 text-sm font-bold">
+            Nächstes Level: Organisator 🌱
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mb-5">
+          <div className="bg-white rounded-3xl p-5 shadow">
+            <p className="text-3xl mb-2">🎯</p>
+            <h2 className="font-black">Wochenziel</h2>
+            <p className="text-sm text-gray-500 mb-3">14 / 20 Missionen</p>
+
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-orange-500 h-2 rounded-full w-[70%]"></div>
+            </div>
+
+            <p className="text-xs text-gray-500 mt-3">🍕 Pizzaabend</p>
+          </div>
+
+          <div className="bg-white rounded-3xl p-5 shadow">
+            <p className="text-3xl mb-2">🏕️</p>
+            <h2 className="font-black">Familienziel</h2>
+            <p className="text-sm text-gray-500 mb-3">620 / 1000 XP</p>
+
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-green-500 h-2 rounded-full w-3/5"></div>
+            </div>
+
+            <p className="text-xs text-gray-500 mt-3">🎢 Europa-Park</p>
           </div>
         </div>
-        <div className="bg-white rounded-3xl p-6 shadow mb-4">
-  <h2 className="text-xl font-bold mb-3">
-    🏕️ Familienziel
-  </h2>
-  <div className="bg-white rounded-3xl p-6 shadow mb-4">
-  <h2 className="text-xl font-bold mb-3">
-    🎯 Wochenziel
-  </h2>
 
-  <p className="font-bold text-lg">
-    20 Missionen erledigen
-  </p>
+        <div className="bg-white rounded-3xl p-5 shadow mb-5">
+          <h2 className="text-xl font-black mb-3">🌱 Verantwortung</h2>
 
-  <p className="text-gray-600 mb-3">
-    Die ganze Familie arbeitet zusammen.
-  </p>
+          <p className="font-bold">Level 3 – Planer</p>
+          <p className="text-sm text-gray-500 mb-4">
+            Du darfst schon mitplanen und eigene Vorschläge machen.
+          </p>
 
-  <div className="w-full bg-gray-200 rounded-full h-4">
-    <div className="bg-orange-500 h-4 rounded-full w-[70%]"></div>
-  </div>
+          <div className="space-y-2">
+            <div className="bg-green-50 text-green-700 rounded-2xl p-3 font-bold text-sm">
+              ✅ Einkaufswünsche vorschlagen
+            </div>
 
-  <p className="mt-2 text-sm text-gray-600">
-    14 / 20 Missionen
-  </p>
+            <div className="bg-green-50 text-green-700 rounded-2xl p-3 font-bold text-sm">
+              ✅ Termine vorschlagen
+            </div>
+          </div>
+        </div>
 
-  <div className="mt-4 bg-yellow-100 rounded-2xl p-4">
-    <p className="font-bold">
-      🍕 Belohnung
-    </p>
+        <div className="bg-white rounded-3xl p-5 shadow">
+          <h2 className="text-xl font-black mb-4">📢 Aktivitäten</h2>
 
-    <p className="text-sm text-gray-700">
-      Pizzaabend am Wochenende
-    </p>
-  </div>
-</div>
-  <div className="bg-white rounded-3xl p-6 shadow mb-4">
-  <h2 className="text-xl font-bold mb-3">
-    🌱 Verantwortungslevel
-  </h2>
+          <div className="space-y-4">
+            <div className="flex gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-blue-100 flex items-center justify-center">
+                ⭐
+              </div>
+              <div>
+                <p className="font-bold">Kind 1 erhielt 10 XP</p>
+                <p className="text-xs text-gray-400">Heute · 09:15</p>
+              </div>
+            </div>
 
-  <p className="font-bold text-lg">
-    Level 3 – Planer
-  </p>
+            <div className="flex gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-green-100 flex items-center justify-center">
+                🛒
+              </div>
+              <div>
+                <p className="font-bold">Milch wurde hinzugefügt</p>
+                <p className="text-xs text-gray-400">Heute · 08:40</p>
+              </div>
+            </div>
 
-  <p className="text-gray-600 mb-4">
-    Du kannst schon mitplanen und eigene Vorschläge machen.
-  </p>
-
-  <div className="space-y-2 mb-4">
-    <div className="bg-green-100 text-green-700 rounded-2xl p-3 font-semibold">
-      ✅ Einkaufswünsche vorschlagen
-    </div>
-
-    <div className="bg-green-100 text-green-700 rounded-2xl p-3 font-semibold">
-      ✅ Termine vorschlagen
-    </div>
-  </div>
-
-  <div className="bg-blue-100 rounded-2xl p-4">
-    <p className="font-bold text-blue-800">
-      Nächstes Level: Organisator
-    </p>
-    <p className="text-sm text-blue-700">
-      Schaltet eigene Missionen und mehr Verantwortung frei.
-    </p>
-  </div>
-</div>
-
-  <p className="font-bold text-lg">
-    Europa-Park Ausflug
-  </p>
-
-  <p className="text-gray-600 mb-3">
-    Gemeinsam 1000 XP sammeln
-  </p>
-
-  <div className="w-full bg-gray-200 rounded-full h-4">
-    <div className="bg-green-500 h-4 rounded-full w-3/5"></div>
-  </div>
-
-  <p className="mt-2 text-sm text-gray-600">
-    620 / 1000 XP
-  </p>
-</div>
-
-        <div className="grid grid-cols-2 gap-4 mb-4">
-
-  <div className="bg-white rounded-3xl p-5 shadow">
-    <p className="text-3xl">🔥</p>
-    <p className="font-bold text-gray-900">
-      3 Missionen
-    </p>
-    <p className="text-sm text-gray-600">
-      offen
-    </p>
-  </div>
-
-  <div className="bg-white rounded-3xl p-5 shadow">
-    <p className="text-3xl">📅</p>
-    <p className="font-bold text-gray-900">
-      2 Termine
-    </p>
-    <p className="text-sm text-gray-600">
-      heute
-    </p>
-  </div>
-
-  <div className="bg-white rounded-3xl p-5 shadow">
-    <p className="text-3xl">🛒</p>
-    <p className="font-bold text-gray-900">
-      4 Artikel
-    </p>
-    <p className="text-sm text-gray-600">
-      Einkauf
-    </p>
-  </div>
-
-  <div className="bg-white rounded-3xl p-5 shadow">
-    <p className="text-3xl">🎁</p>
-    <p className="font-bold text-gray-900">
-      30 XP
-    </p>
-    <p className="text-sm text-gray-600">
-      bis Eis
-    </p>
-  </div>
-
-</div>
-
-        <div className="bg-white rounded-3xl p-6 shadow">
-          <h2 className="text-xl font-bold mb-3">🎁 Nächste Belohnung</h2>
-          <p className="text-lg">🍦 Eis essen</p>
-          <p className="text-sm text-gray-800">noch 30 XP fehlen</p>
+            <div className="flex gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-purple-100 flex items-center justify-center">
+                📅
+              </div>
+              <div>
+                <p className="font-bold">Fußballtraining eingetragen</p>
+                <p className="text-xs text-gray-400">Heute · 07:50</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
