@@ -8,6 +8,7 @@ export default function FamilienkuechePage() {
       von: "Kind 1",
       tag: "Freitag",
       status: "Wartet",
+      xp: 5,
       farbe: "bg-yellow-100 text-yellow-700",
     },
     {
@@ -126,6 +127,10 @@ export default function FamilienkuechePage() {
                   </div>
                 </div>
 
+                <p className="text-xs font-black text-orange-600 mt-1">
+  +{item.xp} XP bei Genehmigung
+</p>
+
                 <span className={`text-xs px-3 py-1 rounded-full font-black ${item.farbe}`}>
                   {item.status}
                 </span>
@@ -134,7 +139,7 @@ export default function FamilienkuechePage() {
               {item.status === "Wartet" && (
                 <div className="grid grid-cols-2 gap-3 mt-4">
                   <button className="bg-green-500 text-white font-black py-3 rounded-2xl">
-                    Planen
+                    Planen + XP
                   </button>
 
                   <button className="bg-gray-200 text-gray-600 font-black py-3 rounded-2xl">

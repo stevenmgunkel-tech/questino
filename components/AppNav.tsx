@@ -8,10 +8,10 @@ export default function AppNav() {
 
   const navItems = [
     { href: "/", icon: "🏠", label: "Home" },
-    { href: "/missionen", icon: "📋", label: "Mission" },
+    { href: "/missionen", icon: "🔥", label: "Mission" },
+    { href: "/familienkueche", icon: "🍽️", label: "Küche" },
     { href: "/einkaufsliste", icon: "🛒", label: "Einkauf" },
-    { href: "/kalender", icon: "📅", label: "Kalender" },
-    { href: "/belohnungen", icon: "🎁", label: "Rewards" },
+    { href: "/kalender", icon: "📅", label: "Plan" },
     { href: "/familie", icon: "👨‍👩‍👧", label: "Familie" },
   ];
 
