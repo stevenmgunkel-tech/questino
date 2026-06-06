@@ -42,6 +42,37 @@ export default function Home() {
   </h2>
   <div className="bg-white rounded-3xl p-6 shadow mb-4">
   <h2 className="text-xl font-bold mb-3">
+    🎯 Wochenziel
+  </h2>
+
+  <p className="font-bold text-lg">
+    20 Missionen erledigen
+  </p>
+
+  <p className="text-gray-600 mb-3">
+    Die ganze Familie arbeitet zusammen.
+  </p>
+
+  <div className="w-full bg-gray-200 rounded-full h-4">
+    <div className="bg-orange-500 h-4 rounded-full w-[70%]"></div>
+  </div>
+
+  <p className="mt-2 text-sm text-gray-600">
+    14 / 20 Missionen
+  </p>
+
+  <div className="mt-4 bg-yellow-100 rounded-2xl p-4">
+    <p className="font-bold">
+      🍕 Belohnung
+    </p>
+
+    <p className="text-sm text-gray-700">
+      Pizzaabend am Wochenende
+    </p>
+  </div>
+</div>
+  <div className="bg-white rounded-3xl p-6 shadow mb-4">
+  <h2 className="text-xl font-bold mb-3">
     🌱 Verantwortungslevel
   </h2>
 
@@ -91,18 +122,48 @@ export default function Home() {
 </div>
 
         <div className="grid grid-cols-2 gap-4 mb-4">
-          <div className="bg-white rounded-3xl p-5 shadow">
-            <p className="text-3xl">🔥</p>
-            <p className="font-bold">3 Missionen</p>
-            <p className="text-sm text-gray-800">heute offen</p>
-          </div>
 
-          <div className="bg-white rounded-3xl p-5 shadow">
-            <p className="text-3xl">🛒</p>
-            <p className="font-bold">4 Artikel</p>
-            <p className="text-sm text-gray-800">auf Liste</p>
-          </div>
-        </div>
+  <div className="bg-white rounded-3xl p-5 shadow">
+    <p className="text-3xl">🔥</p>
+    <p className="font-bold text-gray-900">
+      3 Missionen
+    </p>
+    <p className="text-sm text-gray-600">
+      offen
+    </p>
+  </div>
+
+  <div className="bg-white rounded-3xl p-5 shadow">
+    <p className="text-3xl">📅</p>
+    <p className="font-bold text-gray-900">
+      2 Termine
+    </p>
+    <p className="text-sm text-gray-600">
+      heute
+    </p>
+  </div>
+
+  <div className="bg-white rounded-3xl p-5 shadow">
+    <p className="text-3xl">🛒</p>
+    <p className="font-bold text-gray-900">
+      4 Artikel
+    </p>
+    <p className="text-sm text-gray-600">
+      Einkauf
+    </p>
+  </div>
+
+  <div className="bg-white rounded-3xl p-5 shadow">
+    <p className="text-3xl">🎁</p>
+    <p className="font-bold text-gray-900">
+      30 XP
+    </p>
+    <p className="text-sm text-gray-600">
+      bis Eis
+    </p>
+  </div>
+
+</div>
 
         <div className="bg-white rounded-3xl p-6 shadow">
           <h2 className="text-xl font-bold mb-3">🎁 Nächste Belohnung</h2>
