@@ -1,71 +1,84 @@
 import AppNav from "@/components/AppNav";
 
 export default function FamiliePage() {
-  const familie = [
+  const members = [
     {
       name: "Steven",
-      rolle: "Eltern",
-      level: 5,
-      xp: 420,
+      role: "Papa",
+      xp: 120,
+      level: 3,
       icon: "👨",
     },
     {
       name: "Kind 1",
-      rolle: "Kind",
-      level: 3,
-      xp: 120,
+      role: "Kind",
+      xp: 80,
+      level: 2,
       icon: "🧒",
     },
     {
       name: "Kind 2",
-      rolle: "Kind",
+      role: "Kind",
+      xp: 60,
       level: 2,
-      xp: 80,
       icon: "👧",
     },
   ];
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-blue-100 to-purple-100 p-6 pb-28">
+    <main className="min-h-screen bg-[#F6F7FB] p-6 pb-28">
       <div className="max-w-md mx-auto">
-        <h1 className="text-4xl font-bold mb-2">👨‍👩‍👧 Familie</h1>
-        <p className="text-gray-700 mb-6">
-          Deine Familienhelden auf einen Blick.
+        <h1 className="text-3xl font-black mb-2">
+          Familie
+        </h1>
+
+        <p className="text-gray-500 mb-6">
+          Familie Gunkel
         </p>
 
+        <div className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-[2rem] p-6 text-white shadow-xl mb-5">
+          <h2 className="text-2xl font-black">
+            👨‍👩‍👧 3 Mitglieder
+          </h2>
+
+          <p className="text-white/80 mt-2">
+            Gemeinsam 260 XP gesammelt
+          </p>
+        </div>
+
         <div className="space-y-4">
-          {familie.map((person) => (
+          {members.map((member) => (
             <div
-              key={person.name}
-              className="bg-white rounded-3xl p-5 shadow flex items-center justify-between"
+              key={member.name}
+              className="bg-white rounded-[2rem] p-5 shadow"
             >
               <div className="flex items-center gap-4">
-                <div className="text-4xl">{person.icon}</div>
+                <div className="w-14 h-14 rounded-3xl bg-gray-100 flex items-center justify-center text-3xl">
+                  {member.icon}
+                </div>
 
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">
-                    {person.name}
+                <div className="flex-1">
+                  <h2 className="font-black text-lg">
+                    {member.name}
                   </h2>
-                  <p className="text-sm text-gray-600">{person.rolle}</p>
-                  <p className="text-sm font-bold text-blue-600">
-                    Level {person.level} · {person.xp} XP
+
+                  <p className="text-gray-500 text-sm">
+                    {member.role}
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <p className="font-black text-blue-600">
+                    {member.xp} XP
+                  </p>
+
+                  <p className="text-xs text-gray-500">
+                    Level {member.level}
                   </p>
                 </div>
               </div>
-
-              <span className="text-2xl">🏅</span>
             </div>
           ))}
-        </div>
-
-        <div className="bg-white rounded-3xl p-5 shadow mt-6">
-          <h2 className="text-xl font-bold mb-3">🏆 Heldenhalle</h2>
-
-          <ol className="space-y-2">
-            <li>🥇 Steven - 420 XP</li>
-            <li>🥈 Kind 1 - 120 XP</li>
-            <li>🥉 Kind 2 - 80 XP</li>
-          </ol>
         </div>
       </div>
 
