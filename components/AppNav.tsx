@@ -16,28 +16,31 @@ export default function AppNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t shadow-lg">
-      <div className="max-w-md mx-auto grid grid-cols-6 text-center text-[11px]">
-        {navItems.map((item) => {
-          const active = pathname === item.href;
+    <nav className="fixed bottom-4 left-0 right-0 px-4 z-50">
+      <div className="max-w-md mx-auto">
+        <div className="grid grid-cols-6 gap-1 rounded-[2rem] bg-white/90 backdrop-blur-xl p-2 shadow-2xl border border-white/70">
+          {navItems.map((item) => {
+            const active = pathname === item.href;
 
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`p-2 transition ${
-                active
-                  ? "text-blue-600 font-bold"
-                  : "text-gray-500"
-              }`}
-            >
-              <div className={`text-xl ${active ? "scale-110" : ""}`}>
-                {item.icon}
-              </div>
-              {item.label}
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex flex-col items-center justify-center rounded-2xl py-2 transition-all ${
+                  active
+                    ? "bg-blue-600 text-white shadow-lg scale-105"
+                    : "text-gray-400 hover:bg-gray-100"
+                }`}
+              >
+                <span className="text-xl leading-none">{item.icon}</span>
+
+                <span className="mt-1 text-[10px] font-black leading-none">
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );
