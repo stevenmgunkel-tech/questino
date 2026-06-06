@@ -57,6 +57,40 @@ export default function Home() {
           </p>
         </div>
 
+        <div className="grid grid-cols-4 gap-3 mb-5">
+  <a
+    href="/missionen"
+    className="bg-white rounded-3xl p-4 shadow flex flex-col items-center justify-center"
+  >
+    <span className="text-2xl mb-2">➕</span>
+    <span className="text-[11px] font-black text-gray-700">Mission</span>
+  </a>
+
+  <a
+    href="/kalender"
+    className="bg-white rounded-3xl p-4 shadow flex flex-col items-center justify-center"
+  >
+    <span className="text-2xl mb-2">📅</span>
+    <span className="text-[11px] font-black text-gray-700">Termin</span>
+  </a>
+
+  <a
+    href="/einkaufsliste"
+    className="bg-white rounded-3xl p-4 shadow flex flex-col items-center justify-center"
+  >
+    <span className="text-2xl mb-2">🛒</span>
+    <span className="text-[11px] font-black text-gray-700">Einkauf</span>
+  </a>
+
+  <a
+    href="/belohnungen"
+    className="bg-white rounded-3xl p-4 shadow flex flex-col items-center justify-center"
+  >
+    <span className="text-2xl mb-2">🎁</span>
+    <span className="text-[11px] font-black text-gray-700">Reward</span>
+  </a>
+</div>
+
         <div className="grid grid-cols-2 gap-4 mb-5">
           <div className="bg-white rounded-3xl p-5 shadow">
             <p className="text-3xl mb-2">🎯</p>
