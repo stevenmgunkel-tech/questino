@@ -21,6 +21,51 @@ type Familie = {
   familien_code: string;
 };
 
+function berechneLevel(xp: number) {
+  if (xp >= 1000) {
+    return {
+      level: 5,
+      name: "Meister",
+      aktuellesLevelXP: 1000,
+      naechstesLevelXP: 1000,
+    };
+  }
+
+  if (xp >= 500) {
+    return {
+      level: 4,
+      name: "Organisator",
+      aktuellesLevelXP: 500,
+      naechstesLevelXP: 1000,
+    };
+  }
+
+  if (xp >= 250) {
+    return {
+      level: 3,
+      name: "Planer",
+      aktuellesLevelXP: 250,
+      naechstesLevelXP: 500,
+    };
+  }
+
+  if (xp >= 100) {
+    return {
+      level: 2,
+      name: "Starter",
+      aktuellesLevelXP: 100,
+      naechstesLevelXP: 250,
+    };
+  }
+
+  return {
+    level: 1,
+    name: "Entdecker",
+    aktuellesLevelXP: 0,
+    naechstesLevelXP: 100,
+  };
+}
+
 export default function Home() {
   const router = useRouter();
 
@@ -64,7 +109,23 @@ export default function Home() {
     }
 
     loadData();
-  }, [router]);
+    }, [router]);
+
+  const xp = mitglied?.xp ?? 0;
+  const levelInfo = berechneLevel(xp);
+
+  const fortschritt =
+    levelInfo.naechstesLevelXP === levelInfo.aktuellesLevelXP
+      ? 100
+      : Math.min(
+          100,
+          Math.round(
+            ((xp - levelInfo.aktuellesLevelXP) /
+              (levelInfo.naechstesLevelXP - levelInfo.aktuellesLevelXP)) *
+              100
+          )
+        );
+
   return (
     <main className="min-h-screen bg-[#F6F7FB] px-5 pt-6 pb-32 text-gray-900">
       <div className="mx-auto max-w-md">
@@ -94,58 +155,74 @@ export default function Home() {
         </div>
 
         <section className="relative mb-5 overflow-hidden rounded-[2.2rem] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-6 text-white shadow-2xl">
-          <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/10" />
-          <div className="absolute -bottom-20 -left-16 h-48 w-48 rounded-full bg-white/10" />
+  <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/10" />
+  <div className="absolute -bottom-20 -left-16 h-48 w-48 rounded-full bg-white/10" />
 
-          <div className="relative">
-            <div className="mb-6 flex items-start justify-between">
-              <div>
-                <p className="font-medium text-white/75">Aktueller Rang</p>
-                <h2 className="text-2xl font-black">Level 3 – Planer</h2>
-                <p className="mt-1 text-sm text-white/70">
-                  Du bist auf dem Weg zum Organisator.
-                </p>
-              </div>
+  <div className="relative">
+    <div className="mb-6 flex items-start justify-between">
+      <div>
+        <p className="font-medium text-white/75">Aktueller Rang</p>
+        <h2 className="text-2xl font-black">
+          Level {levelInfo.level} – {levelInfo.name}
+        </h2>
+        <p className="mt-1 text-sm text-white/70">
+          Du wächst mit jeder erledigten Mission weiter.
+        </p>
+      </div>
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-white/20 text-3xl">
-                ⭐
-              </div>
-            </div>
+      <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-white/20 text-3xl">
+        ⭐
+      </div>
+    </div>
 
-            <div className="my-6 flex justify-center">
-              <div className="relative h-44 w-44">
-                <div
-                  className="absolute inset-0 rounded-full shadow-inner"
-                  style={{
-                    background:
-                      "conic-gradient(white 0deg 288deg, rgba(255,255,255,0.22) 288deg 360deg)",
-                  }}
-                />
+    <div className="my-6 flex justify-center">
+      <div className="relative h-44 w-44">
+        <div
+          className="absolute inset-0 rounded-full shadow-inner"
+          style={{
+            background: `conic-gradient(white 0deg ${
+              fortschritt * 3.6
+            }deg, rgba(255,255,255,0.22) ${
+              fortschritt * 3.6
+            }deg 360deg)`,
+          }}
+        />
 
-                <div className="absolute inset-[15px] flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 shadow-inner">
-                  <div className="text-center">
-                    <p className="text-5xl font-black leading-none">120</p>
-                    <p className="mt-1 font-black text-white/75">XP</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mb-2 flex justify-between text-sm text-white/80">
-              <span>120 XP</span>
-              <span>150 XP</span>
-            </div>
-
-            <div className="h-3 w-full rounded-full bg-white/25">
-              <div className="h-3 w-4/5 rounded-full bg-white" />
-            </div>
-
-            <div className="mt-5 rounded-3xl bg-white/15 p-4">
-              <p className="text-sm text-white/75">Nächstes Level</p>
-              <p className="font-black">Organisator 🌱</p>
-            </div>
+        <div className="absolute inset-[15px] flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 shadow-inner">
+          <div className="text-center">
+            <p className="text-5xl font-black leading-none">{xp}</p>
+            <p className="mt-1 font-black text-white/75">XP</p>
           </div>
-        </section>
+        </div>
+      </div>
+    </div>
+
+    <div className="mb-2 flex justify-between text-sm text-white/80">
+      <span>{xp} XP</span>
+      <span>
+        {levelInfo.level >= 5
+          ? "MAX"
+          : `${levelInfo.naechstesLevelXP} XP`}
+      </span>
+    </div>
+
+    <div className="h-3 w-full rounded-full bg-white/25">
+      <div
+        className="h-3 rounded-full bg-white transition-all"
+        style={{ width: `${fortschritt}%` }}
+      />
+    </div>
+
+    <div className="mt-5 rounded-3xl bg-white/15 p-4">
+      <p className="text-sm text-white/75">Nächstes Level</p>
+      <p className="font-black">
+        {levelInfo.level >= 5
+          ? "Maximales Level erreicht 🔥"
+          : `${levelInfo.naechstesLevelXP - xp} XP fehlen noch 🌱`}
+      </p>
+    </div>
+  </div>
+</section>
 
         <section className="mb-5 grid grid-cols-4 gap-3">
           {[
