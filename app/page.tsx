@@ -1,7 +1,70 @@
+"use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import AppNav from "@/components/AppNav";
+import { supabase } from "@/lib/supabase";
+
+type Mitglied = {
+  id: string;
+  name: string;
+  rolle: string;
+  xp: number;
+  level: number;
+  familie_id: string;
+};
+
+type Familie = {
+  id: string;
+  name: string;
+  familien_code: string;
+};
 
 export default function Home() {
+  const router = useRouter();
+
+  const [mitglied, setMitglied] = useState<Mitglied | null>(null);
+  const [familie, setFamilie] = useState<Familie | null>(null);
+
+  useEffect(() => {
+    async function loadData() {
+      const { data: userData } = await supabase.auth.getUser();
+
+      if (!userData.user) {
+        router.push("/login");
+        return;
+      }
+
+      const { data: mitgliedData, error: mitgliedError } = await supabase
+        .from("mitglieder")
+        .select("*")
+        .eq("auth_user_id", userData.user.id)
+        .single();
+
+      if (mitgliedError || !mitgliedData) {
+        alert("Mitglied nicht gefunden.");
+        return;
+      }
+
+      setMitglied(mitgliedData);
+
+      const { data: familieData, error: familieError } = await supabase
+        .from("familien")
+        .select("*")
+        .eq("id", mitgliedData.familie_id)
+        .single();
+
+      if (familieError || !familieData) {
+        alert("Familie nicht gefunden.");
+        return;
+      }
+
+      setFamilie(familieData);
+    }
+
+    loadData();
+  }, [router]);
   return (
     <main className="min-h-screen bg-[#F6F7FB] px-5 pt-6 pb-32 text-gray-900">
       <div className="mx-auto max-w-md">
@@ -12,9 +75,13 @@ export default function Home() {
             </div>
 
             <div>
-              <p className="font-medium text-gray-500">Guten Tag 👋</p>
+              <p className="font-medium text-gray-500">
+  Guten Tag {mitglied?.name ?? ""} 👋
+</p>
               <h1 className="text-3xl font-black leading-none">Questino</h1>
-              <p className="mt-1 text-sm text-gray-500">Familie Gunkel</p>
+              <p className="mt-1 text-sm text-gray-500">
+  {familie?.name ?? "Familie wird geladen..."}
+</p>
             </div>
           </div>
 
