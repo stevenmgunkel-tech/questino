@@ -138,11 +138,13 @@ export default function MissionenPage() {
   }
 
   await supabase
-    .from("mitglieder")
-    .update({
-      xp: (mitglied.xp || 0) + mission.xp,
-    })
-    .eq("id", mitglied.id);
+  .from("feed")
+  .insert({
+    familie_id: mitglied.familie_id,
+    mitglied_id: mitglied.id,
+    text: `${mitglied.name} erledigte "${mission.titel}"`,
+    xp: mission.xp,
+  });
 
   const { data: missionStaerken } = await supabase
     .from("mission_staerken")
