@@ -148,19 +148,38 @@ export default function MissionenPage() {
       xp: mission.xp,
     });
 
-    const { data: familienXP } = await supabase
+    const { data: familienXP, error: familienXPError } = await supabase
   .from("familien_xp")
   .select("*")
   .eq("familie_id", mitglied.familie_id)
-  .single();
+  .maybeSingle();
+
+if (familienXPError) {
+  console.error("Familien XP Fehler:", familienXPError);
+}
 
 if (familienXP) {
-  await supabase
+  const { error: updateFamilienXPError } = await supabase
     .from("familien_xp")
     .update({
       xp: (familienXP.xp || 0) + mission.xp,
     })
     .eq("id", familienXP.id);
+
+  if (updateFamilienXPError) {
+    console.error("Familien XP Update Fehler:", updateFamilienXPError);
+  }
+} else {
+  const { error: insertFamilienXPError } = await supabase
+    .from("familien_xp")
+    .insert({
+      familie_id: mitglied.familie_id,
+      xp: mission.xp,
+    });
+
+  if (insertFamilienXPError) {
+    console.error("Familien XP Insert Fehler:", insertFamilienXPError);
+  }
 }
 
     await supabase
