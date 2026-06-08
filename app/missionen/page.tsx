@@ -157,8 +157,28 @@ export default function MissionenPage() {
   .maybeSingle();
 
 if (familienXPError) {
-  console.error("Familien XP Fehler:", familienXPError);
+  alert("Familien XP Fehler: " + familienXPError.message);
+  return;
 }
+
+if (!familienXP) {
+  alert("Kein Familien XP Eintrag gefunden für: " + mitglied.familie_id);
+  return;
+}
+
+const { error: updateError } = await supabase
+  .from("familien_xp")
+  .update({
+    xp: (familienXP.xp || 0) + mission.xp,
+  })
+  .eq("id", familienXP.id);
+
+if (updateError) {
+  alert("Update Fehler: " + updateError.message);
+  return;
+}
+
+alert("Familien XP wurde erhöht");
 
 if (familienXP) {
   const { error: updateFamilienXPError } = await supabase
