@@ -148,6 +148,8 @@ export default function MissionenPage() {
       xp: mission.xp,
     });
 
+    alert("Familien XP Block wird ausgeführt");
+
     const { data: familienXP, error: familienXPError } = await supabase
   .from("familien_xp")
   .select("*")
