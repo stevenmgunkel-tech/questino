@@ -26,49 +26,18 @@ type BesteStaerke = {
   punkte: number;
 };
 
+type NaechsteBelohnung = {
+  titel: string;
+  kosten: number;
+};
+
 function berechneLevel(xp: number) {
-  if (xp >= 1000) {
-    return {
-      level: 5,
-      name: "Meister",
-      aktuellesLevelXP: 1000,
-      naechstesLevelXP: 1000,
-    };
-  }
+  if (xp >= 1000) return { level: 5, name: "Meister", aktuellesLevelXP: 1000, naechstesLevelXP: 1000 };
+  if (xp >= 500) return { level: 4, name: "Organisator", aktuellesLevelXP: 500, naechstesLevelXP: 1000 };
+  if (xp >= 250) return { level: 3, name: "Planer", aktuellesLevelXP: 250, naechstesLevelXP: 500 };
+  if (xp >= 100) return { level: 2, name: "Starter", aktuellesLevelXP: 100, naechstesLevelXP: 250 };
 
-  if (xp >= 500) {
-    return {
-      level: 4,
-      name: "Organisator",
-      aktuellesLevelXP: 500,
-      naechstesLevelXP: 1000,
-    };
-  }
-
-  if (xp >= 250) {
-    return {
-      level: 3,
-      name: "Planer",
-      aktuellesLevelXP: 250,
-      naechstesLevelXP: 500,
-    };
-  }
-
-  if (xp >= 100) {
-    return {
-      level: 2,
-      name: "Starter",
-      aktuellesLevelXP: 100,
-      naechstesLevelXP: 250,
-    };
-  }
-
-  return {
-    level: 1,
-    name: "Entdecker",
-    aktuellesLevelXP: 0,
-    naechstesLevelXP: 100,
-  };
+  return { level: 1, name: "Entdecker", aktuellesLevelXP: 0, naechstesLevelXP: 100 };
 }
 
 export default function Home() {
@@ -79,7 +48,9 @@ export default function Home() {
   const [offeneMissionen, setOffeneMissionen] = useState(0);
   const [letzteAktivitaet, setLetzteAktivitaet] = useState("");
   const [besteStaerke, setBesteStaerke] = useState<BesteStaerke | null>(null);
-  const [naechsteBelohnung, setNaechsteBelohnung] = useState("");
+  const [familienXP, setFamilienXP] = useState(0);
+  const [naechsteBelohnung, setNaechsteBelohnung] =
+    useState<NaechsteBelohnung | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -115,6 +86,15 @@ export default function Home() {
       }
 
       setFamilie(familieData);
+
+      const { data: familienXPData } = await supabase
+        .from("familien_xp")
+        .select("*")
+        .eq("familie_id", familieData.id)
+        .maybeSingle();
+
+      const aktuelleFamilienXP = familienXPData?.xp || 0;
+      setFamilienXP(aktuelleFamilienXP);
 
       const { count } = await supabase
         .from("missionen")
@@ -159,12 +139,17 @@ export default function Home() {
         .from("belohnungen")
         .select("*")
         .eq("familie_id", mitgliedData.familie_id)
-        .gte("kosten", mitgliedData.xp || 0)
+        .gte("kosten", aktuelleFamilienXP)
         .order("kosten", { ascending: true })
         .limit(1)
         .maybeSingle();
 
-      setNaechsteBelohnung(belohnungData?.titel || "");
+      if (belohnungData) {
+        setNaechsteBelohnung({
+          titel: belohnungData.titel,
+          kosten: belohnungData.kosten,
+        });
+      }
     }
 
     loadData();
@@ -184,6 +169,12 @@ export default function Home() {
               100
           )
         );
+
+  const familienZielKosten = naechsteBelohnung?.kosten || 100;
+  const familienFortschritt = Math.min(
+    100,
+    Math.round((familienXP / familienZielKosten) * 100)
+  );
 
   return (
     <main className="min-h-screen bg-[#F6F7FB] px-5 pt-6 pb-32 text-gray-900">
@@ -259,7 +250,9 @@ export default function Home() {
             <div className="mb-2 flex justify-between text-sm text-white/80">
               <span>{xp} XP</span>
               <span>
-                {levelInfo.level >= 5 ? "MAX" : `${levelInfo.naechstesLevelXP} XP`}
+                {levelInfo.level >= 5
+                  ? "MAX"
+                  : `${levelInfo.naechstesLevelXP} XP`}
               </span>
             </div>
 
@@ -302,6 +295,41 @@ export default function Home() {
         </section>
 
         <section className="mb-5 rounded-3xl bg-white p-5 shadow">
+          <h2 className="mb-4 text-xl font-black">🏆 Familienziel</h2>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="font-black">
+                {naechsteBelohnung?.titel || "Nächste Belohnung"}
+              </p>
+              <p className="text-sm text-gray-500">
+                {familienXP} / {familienZielKosten} XP
+              </p>
+            </div>
+
+            <p className="text-2xl font-black text-green-600">
+              {familienFortschritt}%
+            </p>
+          </div>
+
+          <div className="mt-4 h-3 w-full rounded-full bg-gray-200">
+            <div
+              className="h-3 rounded-full bg-green-500 transition-all"
+              style={{ width: `${familienFortschritt}%` }}
+            />
+          </div>
+
+          <p className="mt-3 text-sm text-gray-500">
+            {naechsteBelohnung
+              ? `${Math.max(
+                  naechsteBelohnung.kosten - familienXP,
+                  0
+                )} XP fehlen noch`
+              : "Noch keine Belohnung angelegt"}
+          </p>
+        </section>
+
+        <section className="mb-5 rounded-3xl bg-white p-5 shadow">
           <h2 className="mb-4 text-xl font-black">🚀 Familien Übersicht</h2>
 
           <div className="space-y-4">
@@ -324,13 +352,6 @@ export default function Home() {
               </div>
               <p className="text-2xl font-black text-green-600">
                 {besteStaerke?.punkte ?? 0}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-gray-50 p-4">
-              <p className="font-black">🎁 Nächste Belohnung</p>
-              <p className="text-sm text-gray-500">
-                {naechsteBelohnung || "Noch keine Belohnung gefunden"}
               </p>
             </div>
 
