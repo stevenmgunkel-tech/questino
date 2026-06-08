@@ -148,6 +148,21 @@ export default function MissionenPage() {
       xp: mission.xp,
     });
 
+    const { data: familienXP } = await supabase
+  .from("familien_xp")
+  .select("*")
+  .eq("familie_id", mitglied.familie_id)
+  .single();
+
+if (familienXP) {
+  await supabase
+    .from("familien_xp")
+    .update({
+      xp: (familienXP.xp || 0) + mission.xp,
+    })
+    .eq("id", familienXP.id);
+}
+
     await supabase
       .from("mitglieder")
       .update({
