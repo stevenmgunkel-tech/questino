@@ -31,6 +31,10 @@ export default function MissionenPage() {
   const [loading, setLoading] = useState(false);
   const [selectedStaerken, setSelectedStaerken] = useState<string[]>([]);
 
+  useEffect(() => {
+    loadMissionen();
+  }, []);
+
   async function getMitglied() {
     const { data: userData } = await supabase.auth.getUser();
 
@@ -123,61 +127,65 @@ export default function MissionenPage() {
   }
 
   async function completeMission(mission: Mission) {
-  const mitglied = await getMitglied();
+    const mitglied = await getMitglied();
 
-  if (!mitglied) return;
+    if (!mitglied) return;
 
-  const { error } = await supabase
-    .from("missionen")
-    .update({ status: "erledigt" })
-    .eq("id", mission.id);
+    const { error } = await supabase
+      .from("missionen")
+      .update({ status: "erledigt" })
+      .eq("id", mission.id);
 
-  if (error) {
-    alert(error.message);
-    return;
-  }
-
-  await supabase
-  .from("feed")
-  .insert({
-    familie_id: mitglied.familie_id,
-    mitglied_id: mitglied.id,
-    text: `${mitglied.name} erledigte "${mission.titel}"`,
-    xp: mission.xp,
-  });
-
-  const { data: missionStaerken } = await supabase
-    .from("mission_staerken")
-    .select("*")
-    .eq("mission_id", mission.id);
-
-  for (const item of missionStaerken || []) {
-    const { data: vorhandeneStaerke } = await supabase
-      .from("mitglied_staerken")
-      .select("*")
-      .eq("mitglied_id", mitglied.id)
-      .eq("staerke_id", item.staerke_id)
-      .maybeSingle();
-
-    if (vorhandeneStaerke) {
-      await supabase
-        .from("mitglied_staerken")
-        .update({
-          punkte: (vorhandeneStaerke.punkte || 0) + item.punkte,
-        })
-        .eq("id", vorhandeneStaerke.id);
-    } else {
-      await supabase.from("mitglied_staerken").insert({
-        mitglied_id: mitglied.id,
-        staerke_id: item.staerke_id,
-        punkte: item.punkte,
-      });
+    if (error) {
+      alert(error.message);
+      return;
     }
-  }
 
-  loadMissionen();
-}
- [];
+    await supabase.from("feed").insert({
+      familie_id: mitglied.familie_id,
+      mitglied_id: mitglied.id,
+      text: `${mitglied.name} erledigte "${mission.titel}"`,
+      xp: mission.xp,
+    });
+
+    await supabase
+      .from("mitglieder")
+      .update({
+        xp: (mitglied.xp || 0) + mission.xp,
+      })
+      .eq("id", mitglied.id);
+
+    const { data: missionStaerken } = await supabase
+      .from("mission_staerken")
+      .select("*")
+      .eq("mission_id", mission.id);
+
+    for (const item of missionStaerken || []) {
+      const { data: vorhandeneStaerke } = await supabase
+        .from("mitglied_staerken")
+        .select("*")
+        .eq("mitglied_id", mitglied.id)
+        .eq("staerke_id", item.staerke_id)
+        .maybeSingle();
+
+      if (vorhandeneStaerke) {
+        await supabase
+          .from("mitglied_staerken")
+          .update({
+            punkte: (vorhandeneStaerke.punkte || 0) + item.punkte,
+          })
+          .eq("id", vorhandeneStaerke.id);
+      } else {
+        await supabase.from("mitglied_staerken").insert({
+          mitglied_id: mitglied.id,
+          staerke_id: item.staerke_id,
+          punkte: item.punkte,
+        });
+      }
+    }
+
+    loadMissionen();
+  }
 
   return (
     <main className="min-h-screen bg-[#F6F7FB] px-5 pt-6 pb-32 text-gray-900">
