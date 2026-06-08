@@ -21,6 +21,51 @@ const icons: Record<string, string> = {
   Dankbarkeit: "🙏",
 };
 
+function getStaerkeLevel(punkte: number) {
+  if (punkte >= 50) {
+    return {
+      level: 5,
+      titel: "Vorbild",
+      start: 50,
+      next: 50,
+    };
+  }
+
+  if (punkte >= 25) {
+    return {
+      level: 4,
+      titel: "Planer",
+      start: 25,
+      next: 50,
+    };
+  }
+
+  if (punkte >= 10) {
+    return {
+      level: 3,
+      titel: "Lernender",
+      start: 10,
+      next: 25,
+    };
+  }
+
+  if (punkte >= 5) {
+    return {
+      level: 2,
+      titel: "Entdecker",
+      start: 5,
+      next: 10,
+    };
+  }
+
+  return {
+    level: 1,
+    titel: "Anfänger",
+    start: 0,
+    next: 5,
+  };
+}
+
 export default function StaerkenPage() {
   const [staerken, setStaerken] = useState<Staerke[]>([]);
   const [loading, setLoading] = useState(true);
@@ -99,27 +144,64 @@ export default function StaerkenPage() {
         )}
 
         <div className="space-y-4">
-          {staerken.map((staerke) => (
-            <div
-              key={staerke.id}
-              className="bg-white rounded-3xl p-5 shadow flex items-center justify-between"
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl">
-                  {icons[staerke.name] || "🌱"}
-                </div>
+          {staerken.map((staerke) => {
+            const levelInfo = getStaerkeLevel(staerke.punkte);
 
-                <div>
-                  <h2 className="font-bold text-lg">{staerke.name}</h2>
-                  <p className="text-sm text-gray-500">Entwicklungspunkte</p>
+            const progress =
+              levelInfo.next === levelInfo.start
+                ? 100
+                : Math.min(
+                    100,
+                    Math.round(
+                      ((staerke.punkte - levelInfo.start) /
+                        (levelInfo.next - levelInfo.start)) *
+                        100
+                    )
+                  );
+
+            return (
+              <div
+                key={staerke.id}
+                className="bg-white rounded-3xl p-5 shadow"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-2xl">
+                    {icons[staerke.name] || "🌱"}
+                  </div>
+
+                  <div className="flex-1">
+                    <div className="flex justify-between gap-3">
+                      <div>
+                        <h2 className="font-black text-lg">{staerke.name}</h2>
+                        <p className="text-sm text-gray-500">
+                          Level {levelInfo.level} – {levelInfo.titel}
+                        </p>
+                      </div>
+
+                      <div className="text-2xl font-black text-blue-600">
+                        {staerke.punkte}
+                      </div>
+                    </div>
+
+                    <div className="mt-4 h-3 w-full rounded-full bg-gray-200 overflow-hidden">
+                      <div
+                        className="h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+
+                    <p className="mt-2 text-xs text-gray-400">
+                      {levelInfo.level >= 5
+                        ? "Maximale Stärke erreicht 🔥"
+                        : `${staerke.punkte} / ${levelInfo.next} Punkte bis Level ${
+                            levelInfo.level + 1
+                          }`}
+                    </p>
+                  </div>
                 </div>
               </div>
-
-              <div className="text-2xl font-black text-blue-600">
-                {staerke.punkte}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 
