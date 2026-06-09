@@ -13,6 +13,7 @@ type Belohnung = {
 
 export default function BelohnungenPage() {
   const [belohnungen, setBelohnungen] = useState<Belohnung[]>([]);
+  const [familienXP, setFamilienXP] = useState(0);
 
   useEffect(() => {
     ladeBelohnungen();
@@ -29,6 +30,14 @@ export default function BelohnungenPage() {
       .single();
 
     if (!mitglied) return;
+
+    const { data: xpData } = await supabase
+      .from("familien_xp")
+      .select("xp")
+      .eq("familie_id", mitglied.familie_id)
+      .single();
+
+    setFamilienXP(xpData?.xp || 0);
 
     const { data, error } = await supabase
       .from("belohnungen")
@@ -48,30 +57,74 @@ export default function BelohnungenPage() {
     <main className="min-h-screen bg-[#F6F7FB] p-6 pb-28 text-gray-900">
       <div className="max-w-md mx-auto">
         <h1 className="text-3xl font-black mb-2">🎁 Belohnungen</h1>
-        <p className="text-gray-500 mb-6">
+        <p className="text-gray-500 mb-4">
           Verdiente XP können in gemeinsame Erlebnisse wachsen.
         </p>
 
+        <div className="bg-white rounded-3xl p-5 shadow mb-6">
+          <p className="text-sm text-gray-500">Familien XP</p>
+          <p className="text-4xl font-black text-blue-600">{familienXP}</p>
+        </div>
+
         <div className="space-y-4">
-          {belohnungen.map((belohnung) => (
-            <div key={belohnung.id} className="bg-white rounded-3xl p-5 shadow">
-              <div className="flex justify-between gap-4">
-                <div>
-                  <h2 className="text-xl font-black">{belohnung.titel}</h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {belohnung.beschreibung}
-                  </p>
+          {belohnungen.map((belohnung) => {
+            const freigeschaltet = familienXP >= belohnung.kosten;
+            const progress = Math.min(
+              100,
+              Math.round((familienXP / belohnung.kosten) * 100)
+            );
+
+            return (
+              <div
+                key={belohnung.id}
+                className="bg-white rounded-3xl p-5 shadow"
+              >
+                <div className="flex justify-between gap-4">
+                  <div>
+                    <h2 className="text-xl font-black">{belohnung.titel}</h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {belohnung.beschreibung}
+                    </p>
+                  </div>
+
+                  <div className="text-right">
+                    <p className="text-2xl font-black text-blue-600">
+                      {belohnung.kosten}
+                    </p>
+                    <p className="text-xs text-gray-400">XP</p>
+                  </div>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-2xl font-black text-blue-600">
-                    {belohnung.kosten}
-                  </p>
-                  <p className="text-xs text-gray-400">XP</p>
+                <div className="mt-4">
+                  <div className="flex justify-between text-xs text-gray-500 mb-2">
+                    <span>
+                      {familienXP} / {belohnung.kosten} XP
+                    </span>
+                    <span>{progress}%</span>
+                  </div>
+
+                  <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div
+                      className={`h-3 rounded-full transition-all ${
+                        freigeschaltet
+                          ? "bg-gradient-to-r from-green-400 to-emerald-500"
+                          : "bg-gradient-to-r from-orange-400 to-yellow-400"
+                      }`}
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div
+                  className={`mt-4 font-black ${
+                    freigeschaltet ? "text-green-600" : "text-gray-500"
+                  }`}
+                >
+                  {freigeschaltet ? "🔓 Freigeschaltet" : "🔒 Gesperrt"}
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {belohnungen.length === 0 && (
             <div className="bg-white rounded-3xl p-6 text-center shadow text-gray-500">
