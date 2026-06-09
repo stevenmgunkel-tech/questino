@@ -28,7 +28,6 @@ export default function RoutinenPage() {
 
   async function ladeDaten() {
     const { data: userData } = await supabase.auth.getUser();
-
     if (!userData.user) return;
 
     const { data: mitglied } = await supabase
@@ -58,7 +57,7 @@ export default function RoutinenPage() {
       .eq("mitglied_id", mitglied.id)
       .eq("datum", heute);
 
-    setHeuteLogs(logs?.map((l) => l.routine_id) || []);
+    setHeuteLogs(logs?.map((log) => log.routine_id) || []);
   }
 
   async function routineErstellen() {
@@ -81,7 +80,6 @@ export default function RoutinenPage() {
 
   async function routineErledigen(routine: Routine) {
     if (!mitgliedId) return;
-
     if (heuteLogs.includes(routine.id)) return;
 
     const heute = new Date().toISOString().split("T")[0];
@@ -94,7 +92,7 @@ export default function RoutinenPage() {
 
     const { data: aktuellesMitglied } = await supabase
       .from("mitglieder")
-      .select("xp")
+      .select("xp, familie_id")
       .eq("id", mitgliedId)
       .single();
 
@@ -104,6 +102,13 @@ export default function RoutinenPage() {
         xp: (aktuellesMitglied?.xp || 0) + routine.xp,
       })
       .eq("id", mitgliedId);
+
+    await supabase.from("feed").insert({
+      familie_id: aktuellesMitglied?.familie_id,
+      mitglied_id: mitgliedId,
+      text: `erledigte die Routine "${routine.titel}"`,
+      xp: routine.xp,
+    });
 
     ladeDaten();
   }
@@ -118,35 +123,34 @@ export default function RoutinenPage() {
         </p>
 
         <div className="bg-white rounded-3xl p-5 shadow mb-6">
-          <h2 className="font-black text-xl mb-4">
-            Neue Routine
-          </h2>
+          <h2 className="font-black text-xl mb-4">Neue Routine</h2>
 
           <div className="space-y-3">
             <input
               value={titel}
               onChange={(e) => setTitel(e.target.value)}
               placeholder="z.B. 10 Seiten lesen"
-              className="w-full rounded-2xl border p-3"
+              className="w-full rounded-2xl border border-gray-200 p-3 outline-none"
             />
 
             <textarea
               value={beschreibung}
               onChange={(e) => setBeschreibung(e.target.value)}
               placeholder="Beschreibung"
-              className="w-full rounded-2xl border p-3"
+              className="w-full rounded-2xl border border-gray-200 p-3 outline-none"
             />
 
             <input
               type="number"
               value={xp}
               onChange={(e) => setXp(e.target.value)}
-              className="w-full rounded-2xl border p-3"
+              placeholder="XP"
+              className="w-full rounded-2xl border border-gray-200 p-3 outline-none"
             />
 
             <button
               onClick={routineErstellen}
-              className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 p-3 font-black text-white"
+              className="w-full rounded-2xl bg-gradient-to-r from-blue-600 to-purple-600 p-3 font-black text-white shadow"
             >
               🔁 Routine erstellen
             </button>
@@ -158,17 +162,14 @@ export default function RoutinenPage() {
             const erledigt = heuteLogs.includes(routine.id);
 
             return (
-              <div
-                key={routine.id}
-                className="bg-white rounded-3xl p-5 shadow"
-              >
-                <h2 className="text-xl font-black">
-                  {routine.titel}
-                </h2>
+              <div key={routine.id} className="bg-white rounded-3xl p-5 shadow">
+                <h2 className="text-xl font-black">{routine.titel}</h2>
 
-                <p className="text-gray-500 text-sm mt-1">
-                  {routine.beschreibung}
-                </p>
+                {routine.beschreibung && (
+                  <p className="text-gray-500 text-sm mt-1">
+                    {routine.beschreibung}
+                  </p>
+                )}
 
                 <p className="mt-3 font-bold text-blue-600">
                   +{routine.xp} XP
@@ -191,6 +192,12 @@ export default function RoutinenPage() {
               </div>
             );
           })}
+
+          {routinen.length === 0 && (
+            <div className="bg-white rounded-3xl p-6 text-center shadow text-gray-500">
+              Noch keine Routinen angelegt.
+            </div>
+          )}
         </div>
       </div>
 
