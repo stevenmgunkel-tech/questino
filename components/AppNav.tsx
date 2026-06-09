@@ -12,7 +12,7 @@ export default function AppNav() {
   { href: "/staerken", icon: "🌱", label: "Stärken" },
   { href: "/ziele", icon: "🎯", label: "Ziele" },
   { href: "/familienkueche", icon: "🍽️", label: "Küche" },
-  { href: "/einkaufsliste", icon: "🛒", label: "Einkauf" },
+  { href: "/routinen", icon: "🔁", label: "Routine" },
   { href: "/familie", icon: "👨‍👩‍👧", label: "Familie" },
 ];
 
