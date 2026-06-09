@@ -14,12 +14,13 @@ export default function AppNav() {
   { href: "/achievements", icon: "🏆", label: "Erfolge" },
   { href: "/routinen", icon: "🔁", label: "Routine" },
   { href: "/familie", icon: "👨‍👩‍👧", label: "Familie" },
+  { href: "/statistik", icon: "📊", label: "Stats" },
 ];
 
   return (
     <nav className="fixed bottom-3 left-0 right-0 z-50 px-3">
       <div className="mx-auto max-w-md">
-        <div className="grid grid-cols-7 gap-1 rounded-[2rem] border border-white/80 bg-white/90 p-2 shadow-2xl backdrop-blur-xl">
+        <div className="grid grid-cols-8 gap-1 rounded-[2rem] border border-white/80 bg-white/90 p-2 shadow-2xl backdrop-blur-xl">
           {navItems.map((item) => {
             const active =
               pathname === item.href ||
