@@ -12,13 +12,20 @@ type Routine = {
   aktiv: boolean;
 };
 
+type Staerke = {
+  id: string;
+  name: string;
+};
+
 export default function RoutinenPage() {
   const [routinen, setRoutinen] = useState<Routine[]>([]);
+  const [staerken, setStaerken] = useState<Staerke[]>([]);
   const [mitgliedId, setMitgliedId] = useState<string | null>(null);
 
   const [titel, setTitel] = useState("");
   const [beschreibung, setBeschreibung] = useState("");
   const [xp, setXp] = useState("5");
+  const [selectedStaerken, setSelectedStaerken] = useState<string[]>([]);
 
   const [heuteLogs, setHeuteLogs] = useState<string[]>([]);
 
@@ -40,6 +47,13 @@ export default function RoutinenPage() {
 
     setMitgliedId(mitglied.id);
 
+    const { data: staerkenData } = await supabase
+      .from("staerken")
+      .select("id, name")
+      .order("name", { ascending: true });
+
+    setStaerken(staerkenData || []);
+
     const { data: routinenData } = await supabase
       .from("routinen")
       .select("*")
@@ -60,20 +74,47 @@ export default function RoutinenPage() {
     setHeuteLogs(logs?.map((log) => log.routine_id) || []);
   }
 
+  function toggleStaerke(staerkeId: string) {
+    setSelectedStaerken((current) =>
+      current.includes(staerkeId)
+        ? current.filter((id) => id !== staerkeId)
+        : [...current, staerkeId]
+    );
+  }
+
   async function routineErstellen() {
     if (!mitgliedId || !titel) return;
 
-    await supabase.from("routinen").insert({
-      mitglied_id: mitgliedId,
-      titel,
-      beschreibung,
-      xp: Number(xp),
-      aktiv: true,
-    });
+    const { data: neueRoutine, error } = await supabase
+      .from("routinen")
+      .insert({
+        mitglied_id: mitgliedId,
+        titel,
+        beschreibung,
+        xp: Number(xp),
+        aktiv: true,
+      })
+      .select("id")
+      .single();
+
+    if (error || !neueRoutine) {
+      console.error(error);
+      return;
+    }
+
+    if (selectedStaerken.length > 0) {
+      await supabase.from("routine_staerken").insert(
+        selectedStaerken.map((staerkeId) => ({
+          routine_id: neueRoutine.id,
+          staerke_id: staerkeId,
+        }))
+      );
+    }
 
     setTitel("");
     setBeschreibung("");
     setXp("5");
+    setSelectedStaerken([]);
 
     ladeDaten();
   }
@@ -102,6 +143,37 @@ export default function RoutinenPage() {
         xp: (aktuellesMitglied?.xp || 0) + routine.xp,
       })
       .eq("id", mitgliedId);
+
+    const { data: routineStaerken } = await supabase
+      .from("routine_staerken")
+      .select("staerke_id")
+      .eq("routine_id", routine.id);
+
+    if (routineStaerken && routineStaerken.length > 0) {
+      for (const eintrag of routineStaerken) {
+        const { data: vorhandeneStaerke } = await supabase
+          .from("mitglied_staerken")
+          .select("id, punkte")
+          .eq("mitglied_id", mitgliedId)
+          .eq("staerke_id", eintrag.staerke_id)
+          .maybeSingle();
+
+        if (vorhandeneStaerke) {
+          await supabase
+            .from("mitglied_staerken")
+            .update({
+              punkte: (vorhandeneStaerke.punkte || 0) + 1,
+            })
+            .eq("id", vorhandeneStaerke.id);
+        } else {
+          await supabase.from("mitglied_staerken").insert({
+            mitglied_id: mitgliedId,
+            staerke_id: eintrag.staerke_id,
+            punkte: 1,
+          });
+        }
+      }
+    }
 
     await supabase.from("feed").insert({
       familie_id: aktuellesMitglied?.familie_id,
@@ -147,6 +219,34 @@ export default function RoutinenPage() {
               placeholder="XP"
               className="w-full rounded-2xl border border-gray-200 p-3 outline-none"
             />
+
+            <div>
+              <p className="mb-2 text-sm font-black text-gray-600">
+                🌱 Trainierte Stärken
+              </p>
+
+              <div className="flex flex-wrap gap-2">
+                {staerken.map((staerke) => {
+                  const selected = selectedStaerken.includes(staerke.id);
+
+                  return (
+                    <button
+                      key={staerke.id}
+                      type="button"
+                      onClick={() => toggleStaerke(staerke.id)}
+                      className={`rounded-full px-3 py-2 text-xs font-black transition ${
+                        selected
+                          ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {selected ? "✓ " : ""}
+                      {staerke.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
 
             <button
               onClick={routineErstellen}
