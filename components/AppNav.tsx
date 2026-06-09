@@ -10,16 +10,16 @@ export default function AppNav() {
   { href: "/", icon: "🏠", label: "Home" },
   { href: "/missionen", icon: "🔥", label: "Mission" },
   { href: "/staerken", icon: "🌱", label: "Stärken" },
+  { href: "/ziele", icon: "🎯", label: "Ziele" },
   { href: "/familienkueche", icon: "🍽️", label: "Küche" },
   { href: "/einkaufsliste", icon: "🛒", label: "Einkauf" },
-  { href: "/kalender", icon: "📅", label: "Plan" },
   { href: "/familie", icon: "👨‍👩‍👧", label: "Familie" },
 ];
 
   return (
     <nav className="fixed bottom-3 left-0 right-0 z-50 px-3">
       <div className="mx-auto max-w-md">
-        <div className="grid grid-cols-6 gap-1 rounded-[2rem] border border-white/80 bg-white/90 p-2 shadow-2xl backdrop-blur-xl">
+        <div className="grid grid-cols-7 gap-1 rounded-[2rem] border border-white/80 bg-white/90 p-2 shadow-2xl backdrop-blur-xl">
           {navItems.map((item) => {
             const active =
               pathname === item.href ||
