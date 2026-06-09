@@ -11,7 +11,7 @@ export default function AppNav() {
   { href: "/missionen", icon: "🔥", label: "Mission" },
   { href: "/staerken", icon: "🌱", label: "Stärken" },
   { href: "/ziele", icon: "🎯", label: "Ziele" },
-  { href: "/familienkueche", icon: "🍽️", label: "Küche" },
+  { href: "/achievements", icon: "🏆", label: "Erfolge" },
   { href: "/routinen", icon: "🔁", label: "Routine" },
   { href: "/familie", icon: "👨‍👩‍👧", label: "Familie" },
 ];
