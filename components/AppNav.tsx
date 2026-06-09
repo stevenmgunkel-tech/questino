@@ -7,13 +7,14 @@ export default function AppNav() {
   const pathname = usePathname();
 
   const navItems = [
-    { href: "/", icon: "🏠", label: "Home" },
-    { href: "/missionen", icon: "🔥", label: "Mission" },
-    { href: "/familienkueche", icon: "🍽️", label: "Küche" },
-    { href: "/einkaufsliste", icon: "🛒", label: "Einkauf" },
-    { href: "/kalender", icon: "📅", label: "Plan" },
-    { href: "/familie", icon: "👨‍👩‍👧", label: "Familie" },
-  ];
+  { href: "/", icon: "🏠", label: "Home" },
+  { href: "/missionen", icon: "🔥", label: "Mission" },
+  { href: "/staerken", icon: "🌱", label: "Stärken" },
+  { href: "/familienkueche", icon: "🍽️", label: "Küche" },
+  { href: "/einkaufsliste", icon: "🛒", label: "Einkauf" },
+  { href: "/kalender", icon: "📅", label: "Plan" },
+  { href: "/familie", icon: "👨‍👩‍👧", label: "Familie" },
+];
 
   return (
     <nav className="fixed bottom-3 left-0 right-0 z-50 px-3">
