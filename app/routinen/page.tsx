@@ -17,15 +17,25 @@ type Staerke = {
   name: string;
 };
 
+type Ziel = {
+  id: string;
+  titel: string;
+  ziel_wert: number;
+  aktueller_wert: number;
+  status: string;
+};
+
 export default function RoutinenPage() {
   const [routinen, setRoutinen] = useState<Routine[]>([]);
   const [staerken, setStaerken] = useState<Staerke[]>([]);
+  const [ziele, setZiele] = useState<Ziel[]>([]);
   const [mitgliedId, setMitgliedId] = useState<string | null>(null);
 
   const [titel, setTitel] = useState("");
   const [beschreibung, setBeschreibung] = useState("");
   const [xp, setXp] = useState("5");
   const [selectedStaerken, setSelectedStaerken] = useState<string[]>([]);
+  const [selectedZiel, setSelectedZiel] = useState("");
 
   const [heuteLogs, setHeuteLogs] = useState<string[]>([]);
 
@@ -53,6 +63,15 @@ export default function RoutinenPage() {
       .order("name", { ascending: true });
 
     setStaerken(staerkenData || []);
+
+    const { data: zieleData } = await supabase
+      .from("ziele")
+      .select("id, titel, ziel_wert, aktueller_wert, status")
+      .eq("mitglied_id", mitglied.id)
+      .eq("status", "aktiv")
+      .order("created_at", { ascending: false });
+
+    setZiele(zieleData || []);
 
     const { data: routinenData } = await supabase
       .from("routinen")
@@ -111,10 +130,18 @@ export default function RoutinenPage() {
       );
     }
 
+    if (selectedZiel) {
+      await supabase.from("ziel_routinen").insert({
+        routine_id: neueRoutine.id,
+        ziel_id: selectedZiel,
+      });
+    }
+
     setTitel("");
     setBeschreibung("");
     setXp("5");
     setSelectedStaerken([]);
+    setSelectedZiel("");
 
     ladeDaten();
   }
@@ -171,6 +198,34 @@ export default function RoutinenPage() {
             staerke_id: eintrag.staerke_id,
             punkte: 1,
           });
+        }
+      }
+    }
+
+    const { data: verknuepfteZiele } = await supabase
+      .from("ziel_routinen")
+      .select("ziel_id")
+      .eq("routine_id", routine.id);
+
+    if (verknuepfteZiele && verknuepfteZiele.length > 0) {
+      for (const eintrag of verknuepfteZiele) {
+        const { data: ziel } = await supabase
+          .from("ziele")
+          .select("id, aktueller_wert, ziel_wert")
+          .eq("id", eintrag.ziel_id)
+          .single();
+
+        if (ziel) {
+          const neuerWert = Number(ziel.aktueller_wert) + 1;
+          const erreicht = neuerWert >= Number(ziel.ziel_wert);
+
+          await supabase
+            .from("ziele")
+            .update({
+              aktueller_wert: neuerWert,
+              status: erreicht ? "erreicht" : "aktiv",
+            })
+            .eq("id", ziel.id);
         }
       }
     }
@@ -246,6 +301,26 @@ export default function RoutinenPage() {
                   );
                 })}
               </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-sm font-black text-gray-600">
+                🎯 Ziel verknüpfen
+              </p>
+
+              <select
+                value={selectedZiel}
+                onChange={(e) => setSelectedZiel(e.target.value)}
+                className="w-full rounded-2xl border border-gray-200 p-3 outline-none"
+              >
+                <option value="">Kein Ziel verknüpfen</option>
+
+                {ziele.map((ziel) => (
+                  <option key={ziel.id} value={ziel.id}>
+                    {ziel.titel} ({ziel.aktueller_wert}/{ziel.ziel_wert})
+                  </option>
+                ))}
+              </select>
             </div>
 
             <button
