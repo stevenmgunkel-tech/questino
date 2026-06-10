@@ -31,11 +31,21 @@ type NaechsteBelohnung = {
   kosten: number;
 };
 
+type HauptZiel = {
+  titel: string;
+  ziel_wert: number;
+  aktueller_wert: number;
+};
+
 function berechneLevel(xp: number) {
-  if (xp >= 1000) return { level: 5, name: "Meister", aktuellesLevelXP: 1000, naechstesLevelXP: 1000 };
-  if (xp >= 500) return { level: 4, name: "Organisator", aktuellesLevelXP: 500, naechstesLevelXP: 1000 };
-  if (xp >= 250) return { level: 3, name: "Planer", aktuellesLevelXP: 250, naechstesLevelXP: 500 };
-  if (xp >= 100) return { level: 2, name: "Starter", aktuellesLevelXP: 100, naechstesLevelXP: 250 };
+  if (xp >= 1000)
+    return { level: 5, name: "Meister", aktuellesLevelXP: 1000, naechstesLevelXP: 1000 };
+  if (xp >= 500)
+    return { level: 4, name: "Organisator", aktuellesLevelXP: 500, naechstesLevelXP: 1000 };
+  if (xp >= 250)
+    return { level: 3, name: "Planer", aktuellesLevelXP: 250, naechstesLevelXP: 500 };
+  if (xp >= 100)
+    return { level: 2, name: "Starter", aktuellesLevelXP: 100, naechstesLevelXP: 250 };
 
   return { level: 1, name: "Entdecker", aktuellesLevelXP: 0, naechstesLevelXP: 100 };
 }
@@ -46,8 +56,10 @@ export default function Home() {
   const [mitglied, setMitglied] = useState<Mitglied | null>(null);
   const [familie, setFamilie] = useState<Familie | null>(null);
   const [offeneMissionen, setOffeneMissionen] = useState(0);
+  const [offeneRoutinen, setOffeneRoutinen] = useState(0);
   const [letzteAktivitaet, setLetzteAktivitaet] = useState("");
   const [besteStaerke, setBesteStaerke] = useState<BesteStaerke | null>(null);
+  const [hauptZiel, setHauptZiel] = useState<HauptZiel | null>(null);
   const [familienXP, setFamilienXP] = useState(0);
   const [naechsteBelohnung, setNaechsteBelohnung] =
     useState<NaechsteBelohnung | null>(null);
@@ -67,23 +79,17 @@ export default function Home() {
         .eq("auth_user_id", userData.user.id)
         .single();
 
-      if (mitgliedError || !mitgliedData) {
-        alert("Mitglied nicht gefunden.");
-        return;
-      }
+      if (mitgliedError || !mitgliedData) return;
 
       setMitglied(mitgliedData);
 
-      const { data: familieData, error: familieError } = await supabase
+      const { data: familieData } = await supabase
         .from("familien")
         .select("*")
         .eq("id", mitgliedData.familie_id)
         .single();
 
-      if (familieError || !familieData) {
-        alert("Familie nicht gefunden.");
-        return;
-      }
+      if (!familieData) return;
 
       setFamilie(familieData);
 
@@ -96,13 +102,34 @@ export default function Home() {
       const aktuelleFamilienXP = familienXPData?.xp || 0;
       setFamilienXP(aktuelleFamilienXP);
 
-      const { count } = await supabase
+      const { count: missionCount } = await supabase
         .from("missionen")
         .select("*", { count: "exact", head: true })
         .eq("familie_id", mitgliedData.familie_id)
         .eq("status", "offen");
 
-      setOffeneMissionen(count || 0);
+      setOffeneMissionen(missionCount || 0);
+
+      const { data: routinenData } = await supabase
+        .from("routinen")
+        .select("id")
+        .eq("mitglied_id", mitgliedData.id)
+        .eq("aktiv", true);
+
+      const heute = new Date().toISOString().split("T")[0];
+
+      const { data: logsHeute } = await supabase
+        .from("routine_logs")
+        .select("routine_id")
+        .eq("mitglied_id", mitgliedData.id)
+        .eq("datum", heute);
+
+      const erledigteIds = logsHeute?.map((log) => log.routine_id) || [];
+      const offeneRoutineCount =
+        routinenData?.filter((routine) => !erledigteIds.includes(routine.id))
+          .length || 0;
+
+      setOffeneRoutinen(offeneRoutineCount);
 
       const { data: feedData } = await supabase
         .from("feed")
@@ -133,6 +160,19 @@ export default function Home() {
           name: staerke.staerken?.name || "Unbekannt",
           punkte: staerke.punkte || 0,
         });
+      }
+
+      const { data: zielData } = await supabase
+        .from("ziele")
+        .select("titel, ziel_wert, aktueller_wert")
+        .eq("mitglied_id", mitgliedData.id)
+        .eq("status", "aktiv")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (zielData) {
+        setHauptZiel(zielData);
       }
 
       const { data: belohnungData } = await supabase
@@ -170,6 +210,15 @@ export default function Home() {
           )
         );
 
+  const zielFortschritt = hauptZiel
+    ? Math.min(
+        100,
+        Math.round(
+          (Number(hauptZiel.aktueller_wert) / Number(hauptZiel.ziel_wert)) * 100
+        )
+      )
+    : 0;
+
   const familienZielKosten = naechsteBelohnung?.kosten || 100;
   const familienFortschritt = Math.min(
     100,
@@ -181,8 +230,8 @@ export default function Home() {
       <div className="mx-auto max-w-md">
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gradient-to-br from-blue-600 to-purple-600 text-2xl text-white shadow-lg">
-              🚀
+            <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-gray-900 text-2xl font-black text-white shadow-lg">
+              Q
             </div>
 
             <div>
@@ -197,31 +246,31 @@ export default function Home() {
           </div>
 
           <Link
-            href="/eltern"
+            href="/familie"
             className="rounded-2xl bg-white px-4 py-2 text-sm font-black shadow"
           >
-            👨 Eltern
+            Familie
           </Link>
         </div>
 
-        <section className="relative mb-5 overflow-hidden rounded-[2.2rem] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-6 text-white shadow-2xl">
+        <section className="relative mb-5 overflow-hidden rounded-[2.2rem] bg-gradient-to-br from-gray-900 via-slate-800 to-emerald-900 p-6 text-white shadow-2xl">
           <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/10" />
           <div className="absolute -bottom-20 -left-16 h-48 w-48 rounded-full bg-white/10" />
 
           <div className="relative">
             <div className="mb-6 flex items-start justify-between">
               <div>
-                <p className="font-medium text-white/75">Aktueller Rang</p>
+                <p className="font-medium text-white/70">Aktueller Rang</p>
                 <h2 className="text-2xl font-black">
                   Level {levelInfo.level} – {levelInfo.name}
                 </h2>
                 <p className="mt-1 text-sm text-white/70">
-                  Du wächst mit jeder erledigten Mission weiter.
+                  Denk nach. Wachse. Entwickle dich.
                 </p>
               </div>
 
-              <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-white/20 text-3xl">
-                ⭐
+              <div className="flex h-12 w-12 items-center justify-center rounded-3xl bg-white/15 text-3xl font-black">
+                Q
               </div>
             </div>
 
@@ -238,10 +287,10 @@ export default function Home() {
                   }}
                 />
 
-                <div className="absolute inset-[15px] flex items-center justify-center rounded-full bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 shadow-inner">
+                <div className="absolute inset-[15px] flex items-center justify-center rounded-full bg-gradient-to-br from-gray-900 via-slate-800 to-emerald-900 shadow-inner">
                   <div className="text-center">
                     <p className="text-5xl font-black leading-none">{xp}</p>
-                    <p className="mt-1 font-black text-white/75">XP</p>
+                    <p className="mt-1 font-black text-white/70">XP</p>
                   </div>
                 </div>
               </div>
@@ -264,34 +313,107 @@ export default function Home() {
             </div>
 
             <div className="mt-5 rounded-3xl bg-white/15 p-4">
-              <p className="text-sm text-white/75">Nächstes Level</p>
+              <p className="text-sm text-white/70">Nächstes Level</p>
               <p className="font-black">
                 {levelInfo.level >= 5
-                  ? "Maximales Level erreicht 🔥"
-                  : `${levelInfo.naechstesLevelXP - xp} XP fehlen noch 🌱`}
+                  ? "Maximales Level erreicht"
+                  : `${levelInfo.naechstesLevelXP - xp} XP fehlen noch`}
               </p>
             </div>
           </div>
         </section>
 
-        <section className="mb-5 grid grid-cols-4 gap-3">
-          {[
-            { href: "/missionen", icon: "➕", label: "Mission" },
-            { href: "/feed", icon: "📢", label: "Feed" },
-            { href: "/staerken", icon: "🌱", label: "Stärken" },
-            { href: "/belohnungen", icon: "🎁", label: "Reward" },
-          ].map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="flex flex-col items-center justify-center rounded-3xl bg-white p-4 shadow transition active:scale-95"
-            >
-              <span className="mb-2 text-2xl">{item.icon}</span>
-              <span className="text-[11px] font-black text-gray-700">
-                {item.label}
-              </span>
-            </Link>
-          ))}
+        <section className="mb-5 rounded-3xl bg-white p-5 shadow">
+          <h2 className="mb-4 text-xl font-black">🌱 Deine stärkste Eigenschaft</h2>
+
+          <div className="flex items-center justify-between rounded-2xl bg-gray-50 p-4">
+            <div>
+              <p className="font-black">
+                {besteStaerke?.name ?? "Noch keine Stärke"}
+              </p>
+              <p className="text-sm text-gray-500">
+                wächst durch Missionen und Routinen
+              </p>
+            </div>
+
+            <p className="text-3xl font-black text-emerald-700">
+              {besteStaerke?.punkte ?? 0}
+            </p>
+          </div>
+        </section>
+
+        <section className="mb-5 rounded-3xl bg-white p-5 shadow">
+          <h2 className="mb-4 text-xl font-black">🔥 Heute</h2>
+
+          <div className="space-y-3">
+            <div className="flex items-center justify-between rounded-2xl bg-gray-50 p-4">
+              <div>
+                <p className="font-black">Offene Missionen</p>
+                <p className="text-sm text-gray-500">Was noch ansteht</p>
+              </div>
+
+              <p className="text-3xl font-black text-orange-600">
+                {offeneMissionen}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between rounded-2xl bg-gray-50 p-4">
+              <div>
+                <p className="font-black">Offene Routinen</p>
+                <p className="text-sm text-gray-500">Was heute noch zählt</p>
+              </div>
+
+              <p className="text-3xl font-black text-purple-600">
+                {offeneRoutinen}
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-gray-50 p-4">
+              <p className="font-black">Letzte Aktivität</p>
+              <p className="mt-1 text-sm text-gray-500">
+                {letzteAktivitaet || "Noch keine Aktivität"}
+              </p>
+            </div>
+          </div>
+
+          <Link
+            href="/routinen"
+            className="mt-4 block rounded-2xl bg-gray-900 p-3 text-center font-black text-white"
+          >
+            Heute loslegen
+          </Link>
+        </section>
+
+        <section className="mb-5 rounded-3xl bg-white p-5 shadow">
+          <h2 className="mb-4 text-xl font-black">🎯 Aktuelles Ziel</h2>
+
+          {hauptZiel ? (
+            <>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-black">{hauptZiel.titel}</p>
+                  <p className="text-sm text-gray-500">
+                    {hauptZiel.aktueller_wert} / {hauptZiel.ziel_wert}
+                  </p>
+                </div>
+
+                <p className="text-2xl font-black text-blue-600">
+                  {zielFortschritt}%
+                </p>
+              </div>
+
+              <div className="mt-4 h-3 w-full rounded-full bg-gray-200">
+                <div
+                  className="h-3 rounded-full bg-blue-600 transition-all"
+                  style={{ width: `${zielFortschritt}%` }}
+                />
+              </div>
+            </>
+          ) : (
+            <p className="text-sm text-gray-500">
+              Noch kein aktives Ziel. Erstelle dein erstes Ziel.
+            </p>
+          )}
         </section>
 
         <section className="mb-5 rounded-3xl bg-white p-5 shadow">
@@ -314,7 +436,7 @@ export default function Home() {
 
           <div className="mt-4 h-3 w-full rounded-full bg-gray-200">
             <div
-              className="h-3 rounded-full bg-green-500 transition-all"
+              className="h-3 rounded-full bg-green-600 transition-all"
               style={{ width: `${familienFortschritt}%` }}
             />
           </div>
@@ -330,55 +452,10 @@ export default function Home() {
         </section>
 
         <section className="mb-5 rounded-3xl bg-white p-5 shadow">
-          <h2 className="mb-4 text-xl font-black">🚀 Familien Übersicht</h2>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between rounded-2xl bg-gray-50 p-4">
-              <div>
-                <p className="font-black">🎯 Offene Missionen</p>
-                <p className="text-sm text-gray-500">Was noch ansteht</p>
-              </div>
-              <p className="text-2xl font-black text-blue-600">
-                {offeneMissionen}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between rounded-2xl bg-gray-50 p-4">
-              <div>
-                <p className="font-black">🌱 Beste Stärke</p>
-                <p className="text-sm text-gray-500">
-                  {besteStaerke?.name ?? "Noch keine Stärke"}
-                </p>
-              </div>
-              <p className="text-2xl font-black text-green-600">
-                {besteStaerke?.punkte ?? 0}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-gray-50 p-4">
-              <p className="font-black">📢 Letzte Aktivität</p>
-              <p className="mt-1 text-sm text-gray-500">
-                {letzteAktivitaet || "Noch keine Aktivität"}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        <section className="mb-5 grid grid-cols-2 gap-4">
-          <Link href="/kalender" className="rounded-3xl bg-white p-5 shadow">
-            <p className="mb-2 text-3xl">📅</p>
-            <h2 className="font-black">Kalender</h2>
-            <p className="mt-1 text-sm text-gray-500">Termine planen</p>
-          </Link>
-
-          <Link
-            href="/einkaufsliste"
-            className="rounded-3xl bg-white p-5 shadow"
-          >
-            <p className="mb-2 text-3xl">🛒</p>
-            <h2 className="font-black">Einkauf</h2>
-            <p className="mt-1 text-sm text-gray-500">Liste verwalten</p>
-          </Link>
+          <h2 className="mb-2 text-xl font-black">💡 Impuls des Tages</h2>
+          <p className="text-gray-600">
+            Denk nach. Wachse. Entwickle dich.
+          </p>
         </section>
       </div>
 
