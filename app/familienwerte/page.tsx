@@ -9,6 +9,7 @@ type FamilienWert = {
   titel: string;
   beschreibung: string | null;
   icon: string | null;
+  punkte: number;
 };
 
 export default function FamilienwertePage() {
@@ -37,7 +38,7 @@ export default function FamilienwertePage() {
 
     setFamilieId(mitglied.familie_id);
 
-    const { data, error } = await supabase
+    const { data: werteData, error } = await supabase
       .from("familien_werte")
       .select("*")
       .eq("familie_id", mitglied.familie_id)
@@ -48,7 +49,26 @@ export default function FamilienwertePage() {
       return;
     }
 
-    setWerte(data || []);
+    const { data: punkteData } = await supabase
+      .from("familienwert_punkte")
+      .select("familienwert_id, punkte")
+      .eq("familie_id", mitglied.familie_id);
+
+    const werteMitPunkten =
+      werteData?.map((wert) => {
+        const punkteEintrag = punkteData?.find(
+          (p) => p.familienwert_id === wert.id
+        );
+
+        return {
+          ...wert,
+          punkte: punkteEintrag?.punkte || 0,
+        };
+      }) || [];
+
+    const sortiert = werteMitPunkten.sort((a, b) => b.punkte - a.punkte);
+
+    setWerte(sortiert);
   }
 
   async function wertErstellen() {
@@ -73,6 +93,9 @@ export default function FamilienwertePage() {
     ladeWerte();
   }
 
+  const staerksterWert = werte.length > 0 ? werte[0] : null;
+  const maxPunkte = Math.max(...werte.map((wert) => wert.punkte), 1);
+
   return (
     <main className="min-h-screen bg-[#F6F7FB] p-6 pb-28 text-gray-900">
       <div className="mx-auto max-w-md">
@@ -84,9 +107,33 @@ export default function FamilienwertePage() {
           <h1 className="text-3xl font-black">Familienwerte</h1>
 
           <p className="mt-2 text-sm text-white/70">
-            Was euch als Familie wichtig ist.
+            Das sind nicht nur Wörter. Das lebt ihr als Familie.
           </p>
         </div>
+
+        {staerksterWert && (
+          <div className="mb-6 rounded-3xl bg-white p-5 shadow">
+            <p className="text-sm font-bold text-gray-500">
+              🏆 Euer stärkster Familienwert
+            </p>
+
+            <div className="mt-3 flex items-center gap-4">
+              <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-gray-100 text-3xl">
+                {staerksterWert.icon || "❤️"}
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-black">
+                  {staerksterWert.titel}
+                </h2>
+
+                <p className="text-sm font-bold text-emerald-700">
+                  {staerksterWert.punkte} Punkte
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mb-6 rounded-3xl bg-white p-5 shadow">
           <h2 className="mb-4 text-xl font-black">Neuen Wert erstellen</h2>
@@ -122,24 +169,52 @@ export default function FamilienwertePage() {
           </div>
         </div>
 
+        <div className="mb-4">
+          <h2 className="text-xl font-black">📊 Werte-Ranking</h2>
+          <p className="text-sm text-gray-500">
+            Welche Werte ihr durch Missionen lebt.
+          </p>
+        </div>
+
         <div className="space-y-4">
-          {werte.map((wert) => (
-            <div key={wert.id} className="rounded-3xl bg-white p-5 shadow">
-              <div className="flex gap-4">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 text-2xl">
-                  {wert.icon || "❤️"}
-                </div>
+          {werte.map((wert, index) => {
+            const progress = Math.round((wert.punkte / maxPunkte) * 100);
 
-                <div>
-                  <h2 className="text-xl font-black">{wert.titel}</h2>
+            return (
+              <div key={wert.id} className="rounded-3xl bg-white p-5 shadow">
+                <div className="flex gap-4">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 text-2xl">
+                    {wert.icon || "❤️"}
+                  </div>
 
-                  <p className="mt-1 text-sm text-gray-500">
-                    {wert.beschreibung || "Noch keine Beschreibung"}
-                  </p>
+                  <div className="flex-1">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="text-xl font-black">
+                          #{index + 1} {wert.titel}
+                        </h2>
+
+                        <p className="mt-1 text-sm text-gray-500">
+                          {wert.beschreibung || "Noch keine Beschreibung"}
+                        </p>
+                      </div>
+
+                      <p className="text-2xl font-black text-emerald-700">
+                        {wert.punkte}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 h-3 w-full overflow-hidden rounded-full bg-gray-200">
+                      <div
+                        className="h-3 rounded-full bg-emerald-700 transition-all"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {werte.length === 0 && (
             <div className="rounded-3xl bg-white p-6 text-center text-gray-500 shadow">
