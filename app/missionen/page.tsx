@@ -246,21 +246,36 @@ for (const wert of missionWerte || []) {
     .maybeSingle();
 
   if (vorhandeneWertPunkte) {
-    await supabase
-      .from("familienwert_punkte")
-      .update({
-        punkte: (vorhandeneWertPunkte.punkte || 0) + 1,
-      })
-      .eq("id", vorhandeneWertPunkte.id);
-  } else {
-    await supabase
-      .from("familienwert_punkte")
-      .insert({
-        familie_id: mitglied.familie_id,
-        familienwert_id: wert.familienwert_id,
-        punkte: 1,
-      });
-  }
+  await supabase
+    .from("familienwert_punkte")
+    .update({
+      punkte: (vorhandeneWertPunkte.punkte || 0) + 1,
+    })
+    .eq("id", vorhandeneWertPunkte.id);
+
+  await supabase.from("familienwert_logs").insert({
+    familie_id: mitglied.familie_id,
+    familienwert_id: wert.familienwert_id,
+    mission_id: mission.id,
+    punkte: 1,
+  });
+
+} else {
+  await supabase
+    .from("familienwert_punkte")
+    .insert({
+      familie_id: mitglied.familie_id,
+      familienwert_id: wert.familienwert_id,
+      punkte: 1,
+    });
+
+  await supabase.from("familienwert_logs").insert({
+    familie_id: mitglied.familie_id,
+    familienwert_id: wert.familienwert_id,
+    mission_id: mission.id,
+    punkte: 1,
+  });
+}
 }  
 
     const { data: missionStaerken } = await supabase
