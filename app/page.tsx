@@ -37,17 +37,50 @@ type HauptZiel = {
   aktueller_wert: number;
 };
 
+type Impuls = {
+  text: string;
+  kategorie: string | null;
+};
+
 function berechneLevel(xp: number) {
   if (xp >= 1000)
-    return { level: 5, name: "Meister", aktuellesLevelXP: 1000, naechstesLevelXP: 1000 };
-  if (xp >= 500)
-    return { level: 4, name: "Organisator", aktuellesLevelXP: 500, naechstesLevelXP: 1000 };
-  if (xp >= 250)
-    return { level: 3, name: "Planer", aktuellesLevelXP: 250, naechstesLevelXP: 500 };
-  if (xp >= 100)
-    return { level: 2, name: "Starter", aktuellesLevelXP: 100, naechstesLevelXP: 250 };
+    return {
+      level: 5,
+      name: "Meister",
+      aktuellesLevelXP: 1000,
+      naechstesLevelXP: 1000,
+    };
 
-  return { level: 1, name: "Entdecker", aktuellesLevelXP: 0, naechstesLevelXP: 100 };
+  if (xp >= 500)
+    return {
+      level: 4,
+      name: "Organisator",
+      aktuellesLevelXP: 500,
+      naechstesLevelXP: 1000,
+    };
+
+  if (xp >= 250)
+    return {
+      level: 3,
+      name: "Planer",
+      aktuellesLevelXP: 250,
+      naechstesLevelXP: 500,
+    };
+
+  if (xp >= 100)
+    return {
+      level: 2,
+      name: "Starter",
+      aktuellesLevelXP: 100,
+      naechstesLevelXP: 250,
+    };
+
+  return {
+    level: 1,
+    name: "Entdecker",
+    aktuellesLevelXP: 0,
+    naechstesLevelXP: 100,
+  };
 }
 
 export default function Home() {
@@ -63,7 +96,9 @@ export default function Home() {
   const [familienXP, setFamilienXP] = useState(0);
   const [naechsteBelohnung, setNaechsteBelohnung] =
     useState<NaechsteBelohnung | null>(null);
-  const [staerksterFamilienwert, setStaerksterFamilienwert] = useState<any>(null);
+  const [staerksterFamilienwert, setStaerksterFamilienwert] =
+    useState<any>(null);
+  const [impuls, setImpuls] = useState<Impuls | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -72,6 +107,16 @@ export default function Home() {
       if (!userData.user) {
         router.push("/login");
         return;
+      }
+
+      const { data: impulsData } = await supabase
+        .from("impulse")
+        .select("text, kategorie")
+        .eq("aktiv", true);
+
+      if (impulsData && impulsData.length > 0) {
+        const zufall = Math.floor(Math.random() * impulsData.length);
+        setImpuls(impulsData[zufall]);
       }
 
       const { data: mitgliedData, error: mitgliedError } = await supabase
@@ -193,30 +238,30 @@ export default function Home() {
       }
 
       const { data: werteData } = await supabase
-  .from("familien_werte")
-  .select("*")
-  .eq("familie_id", mitgliedData.familie_id);
+        .from("familien_werte")
+        .select("*")
+        .eq("familie_id", mitgliedData.familie_id);
 
-const { data: punkteData } = await supabase
-  .from("familienwert_punkte")
-  .select("familienwert_id, punkte")
-  .eq("familie_id", mitgliedData.familie_id);
+      const { data: punkteData } = await supabase
+        .from("familienwert_punkte")
+        .select("familienwert_id, punkte")
+        .eq("familie_id", mitgliedData.familie_id);
 
-const ranking =
-  werteData?.map((wert) => {
-    const punkteEintrag = punkteData?.find(
-      (p) => p.familienwert_id === wert.id
-    );
+      const ranking =
+        werteData?.map((wert) => {
+          const punkteEintrag = punkteData?.find(
+            (p) => p.familienwert_id === wert.id
+          );
 
-    return {
-      ...wert,
-      punkte: punkteEintrag?.punkte || 0,
-    };
-  }) || [];
+          return {
+            ...wert,
+            punkte: punkteEintrag?.punkte || 0,
+          };
+        }) || [];
 
-ranking.sort((a, b) => b.punkte - a.punkte);
+      ranking.sort((a, b) => b.punkte - a.punkte);
 
-setStaerksterFamilienwert(ranking[0] || null);
+      setStaerksterFamilienwert(ranking[0] || null);
     }
 
     loadData();
@@ -279,6 +324,22 @@ setStaerksterFamilienwert(ranking[0] || null);
             Familie
           </Link>
         </div>
+
+        <section className="mb-5 rounded-[2rem] bg-white p-5 shadow">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-sm font-black text-gray-500">
+              💡 Impuls des Tages
+            </p>
+
+            <p className="rounded-full bg-gray-100 px-3 py-1 text-xs font-black text-gray-500">
+              {impuls?.kategorie || "Questino"}
+            </p>
+          </div>
+
+          <p className="text-xl font-black leading-snug text-gray-900">
+            {impuls?.text || "Denk nach. Wachse. Entwickle dich."}
+          </p>
+        </section>
 
         <section className="relative mb-5 overflow-hidden rounded-[2.2rem] bg-gradient-to-br from-gray-900 via-slate-800 to-emerald-900 p-6 text-white shadow-2xl">
           <div className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-white/10" />
@@ -351,7 +412,9 @@ setStaerksterFamilienwert(ranking[0] || null);
         </section>
 
         <section className="mb-5 rounded-3xl bg-white p-5 shadow">
-          <h2 className="mb-4 text-xl font-black">🌱 Deine stärkste Eigenschaft</h2>
+          <h2 className="mb-4 text-xl font-black">
+            🌱 Deine stärkste Eigenschaft
+          </h2>
 
           <div className="flex items-center justify-between rounded-2xl bg-gray-50 p-4">
             <div>
@@ -479,46 +542,39 @@ setStaerksterFamilienwert(ranking[0] || null);
         </section>
 
         {staerksterFamilienwert && (
-  <section className="mb-5 rounded-3xl bg-white p-5 shadow">
-    <h2 className="mb-4 text-xl font-black">
-      ❤️ Aktueller Familienwert
-    </h2>
+          <section className="mb-5 rounded-3xl bg-white p-5 shadow">
+            <h2 className="mb-4 text-xl font-black">
+              ❤️ Aktueller Familienwert
+            </h2>
 
-    <div className="flex items-center gap-4">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 text-2xl">
-        {staerksterFamilienwert.icon || "❤️"}
-      </div>
+            <div className="flex items-center gap-4">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 text-2xl">
+                {staerksterFamilienwert.icon || "❤️"}
+              </div>
 
-      <div className="flex-1">
-        <p className="font-black text-lg">
-          {staerksterFamilienwert.titel}
-        </p>
+              <div className="flex-1">
+                <p className="font-black text-lg">
+                  {staerksterFamilienwert.titel}
+                </p>
 
-        <p className="text-sm text-gray-500">
-          Das lebt ihr gerade am stärksten.
-        </p>
-      </div>
+                <p className="text-sm text-gray-500">
+                  Das lebt ihr gerade am stärksten.
+                </p>
+              </div>
 
-      <p className="text-2xl font-black text-emerald-700">
-        {staerksterFamilienwert.punkte}
-      </p>
-    </div>
+              <p className="text-2xl font-black text-emerald-700">
+                {staerksterFamilienwert.punkte}
+              </p>
+            </div>
 
-    <Link
-      href="/familienwerte"
-      className="mt-4 block rounded-2xl bg-gray-900 p-3 text-center font-black text-white"
-    >
-      Alle Familienwerte ansehen
-    </Link>
-  </section>
-)}
-
-        <section className="mb-5 rounded-3xl bg-white p-5 shadow">
-          <h2 className="mb-2 text-xl font-black">💡 Impuls des Tages</h2>
-          <p className="text-gray-600">
-            Denk nach. Wachse. Entwickle dich.
-          </p>
-        </section>
+            <Link
+              href="/familienwerte"
+              className="mt-4 block rounded-2xl bg-gray-900 p-3 text-center font-black text-white"
+            >
+              Alle Familienwerte ansehen
+            </Link>
+          </section>
+        )}
       </div>
 
       <AppNav />
