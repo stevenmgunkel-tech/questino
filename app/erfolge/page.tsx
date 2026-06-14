@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import AppNav from "@/components/AppNav";
 import { supabase } from "@/lib/supabase";
@@ -173,6 +174,13 @@ export default function ErfolgePage() {
                   </p>
                 </div>
               </div>
+
+              <Link
+                href="/wochenrueckblick"
+                className="mt-4 block rounded-2xl bg-gray-900 p-3 text-center font-black text-white"
+              >
+                Details ansehen
+              </Link>
             </section>
 
             {staerksterWert && (
