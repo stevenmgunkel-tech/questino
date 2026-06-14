@@ -474,6 +474,13 @@ export default function Home() {
           </Link>
         </section>
 
+        <Link
+  href="/wochenrueckblick"
+  className="mt-3 block rounded-2xl bg-white p-3 text-center font-black text-gray-900 shadow"
+>
+  📈 Wochenrückblick ansehen
+</Link>
+
         <section className="mb-5 rounded-3xl bg-white p-5 shadow">
           <h2 className="mb-4 text-xl font-black">🎯 Aktuelles Ziel</h2>
 
