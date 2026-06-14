@@ -30,6 +30,8 @@ export default function MissionenPage() {
   const [missionen, setMissionen] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedStaerken, setSelectedStaerken] = useState<string[]>([]);
+  const [familienwerte, setFamilienwerte] = useState<any[]>([]);
+  const [selectedFamilienwerte, setSelectedFamilienwerte] = useState<string[]>([]);
 
   useEffect(() => {
     loadMissionen();
@@ -65,6 +67,13 @@ export default function MissionenPage() {
     }
 
     setMissionen(data || []);
+
+    const { data: werte } = await supabase
+  .from("familien_werte")
+  .select("*")
+  .eq("familie_id", mitglied.familie_id);
+
+setFamilienwerte(werte || []);
   }
 
   async function createMission() {
@@ -118,6 +127,17 @@ export default function MissionenPage() {
         });
       }
     }
+
+    if (missionData && selectedFamilienwerte.length > 0) {
+  for (const wertId of selectedFamilienwerte) {
+    await supabase
+      .from("mission_familienwerte")
+      .insert({
+        mission_id: missionData.id,
+        familienwert_id: wertId,
+      });
+  }
+}
 
     setTitel("");
     setBeschreibung("");
@@ -276,6 +296,40 @@ if (familienXP) {
               <p className="mb-3 font-black">
                 🌱 Welche Stärken trainiert diese Mission?
               </p>
+
+              <div className="mt-6">
+  <p className="mb-3 font-black">
+    ❤️ Welche Familienwerte trainiert diese Mission?
+  </p>
+
+  <div className="grid grid-cols-2 gap-2">
+    {familienwerte.map((wert) => (
+      <button
+        key={wert.id}
+        type="button"
+        onClick={() => {
+          if (selectedFamilienwerte.includes(wert.id)) {
+            setSelectedFamilienwerte(
+              selectedFamilienwerte.filter((id) => id !== wert.id)
+            );
+          } else {
+            setSelectedFamilienwerte([
+              ...selectedFamilienwerte,
+              wert.id,
+            ]);
+          }
+        }}
+        className={`rounded-2xl p-3 text-sm font-bold transition ${
+          selectedFamilienwerte.includes(wert.id)
+            ? "bg-pink-600 text-white"
+            : "bg-gray-100"
+        }`}
+      >
+        {wert.icon} {wert.titel}
+      </button>
+    ))}
+  </div>
+</div>
 
               <div className="grid grid-cols-2 gap-2">
                 {staerken.map((staerke) => (
