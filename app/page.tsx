@@ -63,6 +63,7 @@ export default function Home() {
   const [familienXP, setFamilienXP] = useState(0);
   const [naechsteBelohnung, setNaechsteBelohnung] =
     useState<NaechsteBelohnung | null>(null);
+  const [staerksterFamilienwert, setStaerksterFamilienwert] = useState<any>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -190,6 +191,32 @@ export default function Home() {
           kosten: belohnungData.kosten,
         });
       }
+
+      const { data: werteData } = await supabase
+  .from("familien_werte")
+  .select("*")
+  .eq("familie_id", mitgliedData.familie_id);
+
+const { data: punkteData } = await supabase
+  .from("familienwert_punkte")
+  .select("familienwert_id, punkte")
+  .eq("familie_id", mitgliedData.familie_id);
+
+const ranking =
+  werteData?.map((wert) => {
+    const punkteEintrag = punkteData?.find(
+      (p) => p.familienwert_id === wert.id
+    );
+
+    return {
+      ...wert,
+      punkte: punkteEintrag?.punkte || 0,
+    };
+  }) || [];
+
+ranking.sort((a, b) => b.punkte - a.punkte);
+
+setStaerksterFamilienwert(ranking[0] || null);
     }
 
     loadData();
@@ -450,6 +477,41 @@ export default function Home() {
               : "Noch keine Belohnung angelegt"}
           </p>
         </section>
+
+        {staerksterFamilienwert && (
+  <section className="mb-5 rounded-3xl bg-white p-5 shadow">
+    <h2 className="mb-4 text-xl font-black">
+      ❤️ Aktueller Familienwert
+    </h2>
+
+    <div className="flex items-center gap-4">
+      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-100 text-2xl">
+        {staerksterFamilienwert.icon || "❤️"}
+      </div>
+
+      <div className="flex-1">
+        <p className="font-black text-lg">
+          {staerksterFamilienwert.titel}
+        </p>
+
+        <p className="text-sm text-gray-500">
+          Das lebt ihr gerade am stärksten.
+        </p>
+      </div>
+
+      <p className="text-2xl font-black text-emerald-700">
+        {staerksterFamilienwert.punkte}
+      </p>
+    </div>
+
+    <Link
+      href="/familienwerte"
+      className="mt-4 block rounded-2xl bg-gray-900 p-3 text-center font-black text-white"
+    >
+      Alle Familienwerte ansehen
+    </Link>
+  </section>
+)}
 
         <section className="mb-5 rounded-3xl bg-white p-5 shadow">
           <h2 className="mb-2 text-xl font-black">💡 Impuls des Tages</h2>
