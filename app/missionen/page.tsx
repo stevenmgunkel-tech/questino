@@ -142,6 +142,7 @@ setFamilienwerte(werte || []);
     setTitel("");
     setBeschreibung("");
     setSelectedStaerken([]);
+    setSelectedFamilienwerte([]);
     setLoading(false);
     loadMissionen();
   }
@@ -230,6 +231,37 @@ if (familienXP) {
         xp: (mitglied.xp || 0) + mission.xp,
       })
       .eq("id", mitglied.id);
+
+    const { data: missionWerte } = await supabase
+  .from("mission_familienwerte")
+  .select("*")
+  .eq("mission_id", mission.id);
+
+for (const wert of missionWerte || []) {
+  const { data: vorhandeneWertPunkte } = await supabase
+    .from("familienwert_punkte")
+    .select("*")
+    .eq("familie_id", mitglied.familie_id)
+    .eq("familienwert_id", wert.familienwert_id)
+    .maybeSingle();
+
+  if (vorhandeneWertPunkte) {
+    await supabase
+      .from("familienwert_punkte")
+      .update({
+        punkte: (vorhandeneWertPunkte.punkte || 0) + 1,
+      })
+      .eq("id", vorhandeneWertPunkte.id);
+  } else {
+    await supabase
+      .from("familienwert_punkte")
+      .insert({
+        familie_id: mitglied.familie_id,
+        familienwert_id: wert.familienwert_id,
+        punkte: 1,
+      });
+  }
+}  
 
     const { data: missionStaerken } = await supabase
       .from("mission_staerken")
