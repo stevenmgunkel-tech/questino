@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import AppNav from "@/components/AppNav";
 import { supabase } from "@/lib/supabase";
+import { pruefeAchievements } from "@/lib/achievements";
 
 type Mission = {
   id: string;
@@ -168,6 +169,8 @@ setFamilienwerte(werte || []);
       text: `${mitglied.name} erledigte "${mission.titel}"`,
       xp: mission.xp,
     });
+
+    await pruefeAchievements(mitglied.id);
 
     alert("Familien XP Block wird ausgeführt");
 
