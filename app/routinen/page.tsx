@@ -3,6 +3,10 @@
 import { useEffect, useState } from "react";
 import AppNav from "@/components/AppNav";
 import { supabase } from "@/lib/supabase";
+import {
+  pruefeAchievements,
+  type FreigeschaltetesAchievement,
+} from "@/lib/achievements";
 
 type Routine = {
   id: string;
@@ -38,6 +42,12 @@ export default function RoutinenPage() {
   const [selectedZiel, setSelectedZiel] = useState("");
 
   const [heuteLogs, setHeuteLogs] = useState<string[]>([]);
+  const [loadingRoutineId, setLoadingRoutineId] = useState<string | null>(null);
+  const [achievementQueue, setAchievementQueue] = useState<
+    FreigeschaltetesAchievement[]
+  >([]);
+
+  const achievementPopup = achievementQueue[0] || null;
 
   useEffect(() => {
     ladeDaten();
@@ -102,7 +112,7 @@ export default function RoutinenPage() {
   }
 
   async function routineErstellen() {
-    if (!mitgliedId || !titel) return;
+    if (!mitgliedId || !titel.trim()) return;
 
     const { data: neueRoutine, error } = await supabase
       .from("routinen")
@@ -137,6 +147,12 @@ export default function RoutinenPage() {
       });
     }
 
+    const neueAchievements = await pruefeAchievements(mitgliedId);
+
+    if (neueAchievements.length > 0) {
+      setAchievementQueue(neueAchievements);
+    }
+
     setTitel("");
     setBeschreibung("");
     setXp("5");
@@ -150,17 +166,25 @@ export default function RoutinenPage() {
     if (!mitgliedId) return;
     if (heuteLogs.includes(routine.id)) return;
 
+    setLoadingRoutineId(routine.id);
+
     const heute = new Date().toISOString().split("T")[0];
 
-    await supabase.from("routine_logs").insert({
+    const { error: logError } = await supabase.from("routine_logs").insert({
       routine_id: routine.id,
       mitglied_id: mitgliedId,
       datum: heute,
     });
 
+    if (logError) {
+      console.error(logError);
+      setLoadingRoutineId(null);
+      return;
+    }
+
     const { data: aktuellesMitglied } = await supabase
       .from("mitglieder")
-      .select("xp, familie_id")
+      .select("xp, familie_id, name")
       .eq("id", mitgliedId)
       .single();
 
@@ -233,24 +257,48 @@ export default function RoutinenPage() {
     await supabase.from("feed").insert({
       familie_id: aktuellesMitglied?.familie_id,
       mitglied_id: mitgliedId,
-      text: `erledigte die Routine "${routine.titel}"`,
+      text: `${aktuellesMitglied?.name || "Jemand"} erledigte die Routine "${
+        routine.titel
+      }"`,
       xp: routine.xp,
     });
 
+    const neueAchievements = await pruefeAchievements(mitgliedId);
+
+    if (neueAchievements.length > 0) {
+      setAchievementQueue(neueAchievements);
+
+      for (const achievement of neueAchievements) {
+        await supabase.from("feed").insert({
+          familie_id: aktuellesMitglied?.familie_id,
+          mitglied_id: mitgliedId,
+          text: `${
+            aktuellesMitglied?.name || "Jemand"
+          } hat das Achievement "${achievement.titel}" freigeschaltet`,
+          xp: achievement.xp_bonus,
+        });
+      }
+    }
+
+    setLoadingRoutineId(null);
     ladeDaten();
+  }
+
+  function closeAchievementPopup() {
+    setAchievementQueue((aktuell) => aktuell.slice(1));
   }
 
   return (
     <main className="min-h-screen bg-[#F6F7FB] p-6 pb-28 text-gray-900">
-      <div className="max-w-md mx-auto">
-        <h1 className="text-3xl font-black mb-2">🔁 Routinen</h1>
+      <div className="mx-auto max-w-md">
+        <h1 className="mb-2 text-3xl font-black">🔁 Routinen</h1>
 
-        <p className="text-gray-500 mb-6">
+        <p className="mb-6 text-gray-500">
           Kleine Gewohnheiten. Große Wirkung.
         </p>
 
-        <div className="bg-white rounded-3xl p-5 shadow mb-6">
-          <h2 className="font-black text-xl mb-4">Neue Routine</h2>
+        <div className="mb-6 rounded-3xl bg-white p-5 shadow">
+          <h2 className="mb-4 text-xl font-black">Neue Routine</h2>
 
           <div className="space-y-3">
             <input
@@ -335,20 +383,19 @@ export default function RoutinenPage() {
         <div className="space-y-4">
           {routinen.map((routine) => {
             const erledigt = heuteLogs.includes(routine.id);
+            const speichert = loadingRoutineId === routine.id;
 
             return (
-              <div key={routine.id} className="bg-white rounded-3xl p-5 shadow">
+              <div key={routine.id} className="rounded-3xl bg-white p-5 shadow">
                 <h2 className="text-xl font-black">{routine.titel}</h2>
 
                 {routine.beschreibung && (
-                  <p className="text-gray-500 text-sm mt-1">
+                  <p className="mt-1 text-sm text-gray-500">
                     {routine.beschreibung}
                   </p>
                 )}
 
-                <p className="mt-3 font-bold text-blue-600">
-                  +{routine.xp} XP
-                </p>
+                <p className="mt-3 font-bold text-blue-600">+{routine.xp} XP</p>
 
                 <div className="mt-4">
                   {erledigt ? (
@@ -358,9 +405,10 @@ export default function RoutinenPage() {
                   ) : (
                     <button
                       onClick={() => routineErledigen(routine)}
-                      className="w-full rounded-2xl bg-gray-900 p-3 font-black text-white"
+                      disabled={speichert}
+                      className="w-full rounded-2xl bg-gray-900 p-3 font-black text-white disabled:opacity-60"
                     >
-                      🔥 Erledigen
+                      {speichert ? "Speichert..." : "🔥 Erledigen"}
                     </button>
                   )}
                 </div>
@@ -369,12 +417,51 @@ export default function RoutinenPage() {
           })}
 
           {routinen.length === 0 && (
-            <div className="bg-white rounded-3xl p-6 text-center shadow text-gray-500">
+            <div className="rounded-3xl bg-white p-6 text-center text-gray-500 shadow">
               Noch keine Routinen angelegt.
             </div>
           )}
         </div>
       </div>
+
+      {achievementPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-5 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-[2rem] bg-gradient-to-br from-gray-900 via-slate-800 to-emerald-900 p-6 text-center text-white shadow-2xl">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[1.7rem] bg-white/15 text-5xl shadow-inner">
+              {achievementPopup.icon || "🏅"}
+            </div>
+
+            <p className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-emerald-200">
+              Achievement freigeschaltet
+            </p>
+
+            <h2 className="mt-3 text-3xl font-black">
+              {achievementPopup.titel}
+            </h2>
+
+            <p className="mt-3 text-sm font-medium leading-6 text-white/70">
+              {achievementPopup.beschreibung ||
+                "Du hast einen neuen Meilenstein erreicht."}
+            </p>
+
+            {achievementPopup.xp_bonus > 0 && (
+              <div className="mt-5 rounded-3xl bg-white/10 p-4">
+                <p className="text-sm text-white/60">Bonus</p>
+                <p className="text-3xl font-black text-emerald-200">
+                  +{achievementPopup.xp_bonus} XP
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={closeAchievementPopup}
+              className="mt-6 w-full rounded-2xl bg-white p-4 font-black text-gray-900 active:scale-[0.98]"
+            >
+              Weiter
+            </button>
+          </div>
+        </div>
+      )}
 
       <AppNav />
     </main>
