@@ -2,25 +2,41 @@ import { supabase } from "@/lib/supabase";
 
 type Achievement = {
   id: string;
+  titel: string;
+  beschreibung: string | null;
+  icon: string | null;
   typ: string | null;
   zielwert: number | null;
   xp_bonus: number | null;
 };
 
-export async function pruefeAchievements(mitgliedId: string) {
+export type FreigeschaltetesAchievement = {
+  id: string;
+  titel: string;
+  beschreibung: string | null;
+  icon: string | null;
+  xp_bonus: number;
+};
+
+export async function pruefeAchievements(
+  mitgliedId: string
+): Promise<FreigeschaltetesAchievement[]> {
+  const neueAchievements: FreigeschaltetesAchievement[] = [];
+
   const { data: mitglied } = await supabase
     .from("mitglieder")
     .select("id, familie_id, xp")
     .eq("id", mitgliedId)
     .single();
 
-  if (!mitglied) return;
+  if (!mitglied) return neueAchievements;
 
   let aktuelleXp = mitglied.xp || 0;
 
   const { data: achievements } = await supabase
     .from("achievements")
-    .select("id, typ, zielwert, xp_bonus");
+    .select("id, titel, beschreibung, icon, typ, zielwert, xp_bonus")
+    .order("zielwert", { ascending: true });
 
   const { data: bereits } = await supabase
     .from("mitglied_achievements")
@@ -31,7 +47,7 @@ export async function pruefeAchievements(mitgliedId: string) {
     bereits?.map((eintrag) => eintrag.achievement_id) || []
   );
 
-  for (const achievement of achievements || []) {
+  for (const achievement of (achievements || []) as Achievement[]) {
     if (unlockedIds.has(achievement.id)) continue;
 
     const fortschritt = await holeFortschritt(
@@ -47,22 +63,39 @@ export async function pruefeAchievements(mitgliedId: string) {
         achievement_id: achievement.id,
       });
 
-      if (error) continue;
+      if (error) {
+        console.error(error);
+        continue;
+      }
 
       const bonus = achievement.xp_bonus || 0;
 
       if (bonus > 0) {
         aktuelleXp += bonus;
 
-        await supabase
+        const { error: xpError } = await supabase
           .from("mitglieder")
           .update({ xp: aktuelleXp })
           .eq("id", mitgliedId);
+
+        if (xpError) {
+          console.error(xpError);
+        }
       }
 
       unlockedIds.add(achievement.id);
+
+      neueAchievements.push({
+        id: achievement.id,
+        titel: achievement.titel,
+        beschreibung: achievement.beschreibung,
+        icon: achievement.icon,
+        xp_bonus: bonus,
+      });
     }
   }
+
+  return neueAchievements;
 }
 
 async function holeFortschritt(
