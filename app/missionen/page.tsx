@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import AppNav from "@/components/AppNav";
 import { supabase } from "@/lib/supabase";
-import { pruefeAchievements } from "@/lib/achievements";
+import {
+  pruefeAchievements,
+  type FreigeschaltetesAchievement,
+} from "@/lib/achievements";
 
 type Mission = {
   id: string;
@@ -32,7 +35,14 @@ export default function MissionenPage() {
   const [loading, setLoading] = useState(false);
   const [selectedStaerken, setSelectedStaerken] = useState<string[]>([]);
   const [familienwerte, setFamilienwerte] = useState<any[]>([]);
-  const [selectedFamilienwerte, setSelectedFamilienwerte] = useState<string[]>([]);
+  const [selectedFamilienwerte, setSelectedFamilienwerte] = useState<string[]>(
+    []
+  );
+  const [achievementQueue, setAchievementQueue] = useState<
+    FreigeschaltetesAchievement[]
+  >([]);
+
+  const achievementPopup = achievementQueue[0] || null;
 
   useEffect(() => {
     loadMissionen();
@@ -70,11 +80,11 @@ export default function MissionenPage() {
     setMissionen(data || []);
 
     const { data: werte } = await supabase
-  .from("familien_werte")
-  .select("*")
-  .eq("familie_id", mitglied.familie_id);
+      .from("familien_werte")
+      .select("*")
+      .eq("familie_id", mitglied.familie_id);
 
-setFamilienwerte(werte || []);
+    setFamilienwerte(werte || []);
   }
 
   async function createMission() {
@@ -130,15 +140,13 @@ setFamilienwerte(werte || []);
     }
 
     if (missionData && selectedFamilienwerte.length > 0) {
-  for (const wertId of selectedFamilienwerte) {
-    await supabase
-      .from("mission_familienwerte")
-      .insert({
-        mission_id: missionData.id,
-        familienwert_id: wertId,
-      });
-  }
-}
+      for (const wertId of selectedFamilienwerte) {
+        await supabase.from("mission_familienwerte").insert({
+          mission_id: missionData.id,
+          familienwert_id: wertId,
+        });
+      }
+    }
 
     setTitel("");
     setBeschreibung("");
@@ -170,64 +178,6 @@ setFamilienwerte(werte || []);
       xp: mission.xp,
     });
 
-    await pruefeAchievements(mitglied.id);
-
-    alert("Familien XP Block wird ausgeführt");
-
-    const { data: familienXP, error: familienXPError } = await supabase
-  .from("familien_xp")
-  .select("*")
-  .eq("familie_id", mitglied.familie_id)
-  .maybeSingle();
-
-if (familienXPError) {
-  alert("Familien XP Fehler: " + familienXPError.message);
-  return;
-}
-
-if (!familienXP) {
-  alert("Kein Familien XP Eintrag gefunden für: " + mitglied.familie_id);
-  return;
-}
-
-const { error: updateError } = await supabase
-  .from("familien_xp")
-  .update({
-    xp: (familienXP.xp || 0) + mission.xp,
-  })
-  .eq("id", familienXP.id);
-
-if (updateError) {
-  alert("Update Fehler: " + updateError.message);
-  return;
-}
-
-alert("Familien XP wurde erhöht");
-
-if (familienXP) {
-  const { error: updateFamilienXPError } = await supabase
-    .from("familien_xp")
-    .update({
-      xp: (familienXP.xp || 0) + mission.xp,
-    })
-    .eq("id", familienXP.id);
-
-  if (updateFamilienXPError) {
-    console.error("Familien XP Update Fehler:", updateFamilienXPError);
-  }
-} else {
-  const { error: insertFamilienXPError } = await supabase
-    .from("familien_xp")
-    .insert({
-      familie_id: mitglied.familie_id,
-      xp: mission.xp,
-    });
-
-  if (insertFamilienXPError) {
-    console.error("Familien XP Insert Fehler:", insertFamilienXPError);
-  }
-}
-
     await supabase
       .from("mitglieder")
       .update({
@@ -235,51 +185,75 @@ if (familienXP) {
       })
       .eq("id", mitglied.id);
 
+    const { data: familienXP, error: familienXPError } = await supabase
+      .from("familien_xp")
+      .select("*")
+      .eq("familie_id", mitglied.familie_id)
+      .maybeSingle();
+
+    if (familienXPError) {
+      console.error("Familien XP Fehler:", familienXPError);
+    }
+
+    if (familienXP) {
+      const { error: updateFamilienXPError } = await supabase
+        .from("familien_xp")
+        .update({
+          xp: (familienXP.xp || 0) + mission.xp,
+        })
+        .eq("id", familienXP.id);
+
+      if (updateFamilienXPError) {
+        console.error("Familien XP Update Fehler:", updateFamilienXPError);
+      }
+    } else {
+      const { error: insertFamilienXPError } = await supabase
+        .from("familien_xp")
+        .insert({
+          familie_id: mitglied.familie_id,
+          xp: mission.xp,
+        });
+
+      if (insertFamilienXPError) {
+        console.error("Familien XP Insert Fehler:", insertFamilienXPError);
+      }
+    }
+
     const { data: missionWerte } = await supabase
-  .from("mission_familienwerte")
-  .select("*")
-  .eq("mission_id", mission.id);
+      .from("mission_familienwerte")
+      .select("*")
+      .eq("mission_id", mission.id);
 
-for (const wert of missionWerte || []) {
-  const { data: vorhandeneWertPunkte } = await supabase
-    .from("familienwert_punkte")
-    .select("*")
-    .eq("familie_id", mitglied.familie_id)
-    .eq("familienwert_id", wert.familienwert_id)
-    .maybeSingle();
+    for (const wert of missionWerte || []) {
+      const { data: vorhandeneWertPunkte } = await supabase
+        .from("familienwert_punkte")
+        .select("*")
+        .eq("familie_id", mitglied.familie_id)
+        .eq("familienwert_id", wert.familienwert_id)
+        .maybeSingle();
 
-  if (vorhandeneWertPunkte) {
-  await supabase
-    .from("familienwert_punkte")
-    .update({
-      punkte: (vorhandeneWertPunkte.punkte || 0) + 1,
-    })
-    .eq("id", vorhandeneWertPunkte.id);
+      if (vorhandeneWertPunkte) {
+        await supabase
+          .from("familienwert_punkte")
+          .update({
+            punkte: (vorhandeneWertPunkte.punkte || 0) + 1,
+          })
+          .eq("id", vorhandeneWertPunkte.id);
+      } else {
+        await supabase.from("familienwert_punkte").insert({
+          familie_id: mitglied.familie_id,
+          familienwert_id: wert.familienwert_id,
+          punkte: 1,
+        });
+      }
 
-  await supabase.from("familienwert_logs").insert({
-    familie_id: mitglied.familie_id,
-    familienwert_id: wert.familienwert_id,
-    mission_id: mission.id,
-    punkte: 1,
-  });
-
-} else {
-  await supabase
-    .from("familienwert_punkte")
-    .insert({
-      familie_id: mitglied.familie_id,
-      familienwert_id: wert.familienwert_id,
-      punkte: 1,
-    });
-
-  await supabase.from("familienwert_logs").insert({
-    familie_id: mitglied.familie_id,
-    familienwert_id: wert.familienwert_id,
-    mission_id: mission.id,
-    punkte: 1,
-  });
-}
-}  
+      await supabase.from("familienwert_logs").insert({
+        familie_id: mitglied.familie_id,
+        familienwert_id: wert.familienwert_id,
+        mission_id: mission.id,
+        punkte: 1,
+      });
+    }
 
     const { data: missionStaerken } = await supabase
       .from("mission_staerken")
@@ -310,11 +284,30 @@ for (const wert of missionWerte || []) {
       }
     }
 
+    const neueAchievements = await pruefeAchievements(mitglied.id);
+
+    if (neueAchievements.length > 0) {
+      setAchievementQueue(neueAchievements);
+
+      for (const achievement of neueAchievements) {
+        await supabase.from("feed").insert({
+          familie_id: mitglied.familie_id,
+          mitglied_id: mitglied.id,
+          text: `${mitglied.name} hat das Achievement "${achievement.titel}" freigeschaltet`,
+          xp: achievement.xp_bonus,
+        });
+      }
+    }
+
     loadMissionen();
   }
 
+  function closeAchievementPopup() {
+    setAchievementQueue((aktuell) => aktuell.slice(1));
+  }
+
   return (
-    <main className="min-h-screen bg-[#F6F7FB] px-5 pt-6 pb-32 text-gray-900">
+    <main className="min-h-screen bg-[#F6F7FB] px-5 pb-32 pt-6 text-gray-900">
       <div className="mx-auto max-w-md">
         <div className="mb-6">
           <p className="font-medium text-gray-500">Questino 🔥</p>
@@ -348,40 +341,40 @@ for (const wert of missionWerte || []) {
               </p>
 
               <div className="mt-6">
-  <p className="mb-3 font-black">
-    ❤️ Welche Familienwerte trainiert diese Mission?
-  </p>
+                <p className="mb-3 font-black">
+                  ❤️ Welche Familienwerte trainiert diese Mission?
+                </p>
 
-  <div className="grid grid-cols-2 gap-2">
-    {familienwerte.map((wert) => (
-      <button
-        key={wert.id}
-        type="button"
-        onClick={() => {
-          if (selectedFamilienwerte.includes(wert.id)) {
-            setSelectedFamilienwerte(
-              selectedFamilienwerte.filter((id) => id !== wert.id)
-            );
-          } else {
-            setSelectedFamilienwerte([
-              ...selectedFamilienwerte,
-              wert.id,
-            ]);
-          }
-        }}
-        className={`rounded-2xl p-3 text-sm font-bold transition ${
-          selectedFamilienwerte.includes(wert.id)
-            ? "bg-pink-600 text-white"
-            : "bg-gray-100"
-        }`}
-      >
-        {wert.icon} {wert.titel}
-      </button>
-    ))}
-  </div>
-</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {familienwerte.map((wert) => (
+                    <button
+                      key={wert.id}
+                      type="button"
+                      onClick={() => {
+                        if (selectedFamilienwerte.includes(wert.id)) {
+                          setSelectedFamilienwerte(
+                            selectedFamilienwerte.filter((id) => id !== wert.id)
+                          );
+                        } else {
+                          setSelectedFamilienwerte([
+                            ...selectedFamilienwerte,
+                            wert.id,
+                          ]);
+                        }
+                      }}
+                      className={`rounded-2xl p-3 text-sm font-bold transition ${
+                        selectedFamilienwerte.includes(wert.id)
+                          ? "bg-pink-600 text-white"
+                          : "bg-gray-100"
+                      }`}
+                    >
+                      {wert.icon} {wert.titel}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-              <div className="grid grid-cols-2 gap-2">
+              <div className="mt-4 grid grid-cols-2 gap-2">
                 {staerken.map((staerke) => (
                   <button
                     key={staerke}
@@ -468,6 +461,45 @@ for (const wert of missionWerte || []) {
           </div>
         </section>
       </div>
+
+      {achievementPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 px-5 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-[2rem] bg-gradient-to-br from-gray-900 via-slate-800 to-emerald-900 p-6 text-center text-white shadow-2xl">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[1.7rem] bg-white/15 text-5xl shadow-inner">
+              {achievementPopup.icon || "🏅"}
+            </div>
+
+            <p className="mt-5 text-xs font-black uppercase tracking-[0.22em] text-emerald-200">
+              Achievement freigeschaltet
+            </p>
+
+            <h2 className="mt-3 text-3xl font-black">
+              {achievementPopup.titel}
+            </h2>
+
+            <p className="mt-3 text-sm font-medium leading-6 text-white/70">
+              {achievementPopup.beschreibung ||
+                "Du hast einen neuen Meilenstein erreicht."}
+            </p>
+
+            {achievementPopup.xp_bonus > 0 && (
+              <div className="mt-5 rounded-3xl bg-white/10 p-4">
+                <p className="text-sm text-white/60">Bonus</p>
+                <p className="text-3xl font-black text-emerald-200">
+                  +{achievementPopup.xp_bonus} XP
+                </p>
+              </div>
+            )}
+
+            <button
+              onClick={closeAchievementPopup}
+              className="mt-6 w-full rounded-2xl bg-white p-4 font-black text-gray-900 active:scale-[0.98]"
+            >
+              Weiter
+            </button>
+          </div>
+        </div>
+      )}
 
       <AppNav />
     </main>
