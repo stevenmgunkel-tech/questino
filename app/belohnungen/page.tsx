@@ -38,7 +38,9 @@ export default function BelohnungenPage() {
   const [familienXP, setFamilienXP] = useState(0);
   const [familieId, setFamilieId] = useState<string | null>(null);
   const [mitgliedId, setMitgliedId] = useState<string | null>(null);
+  const [mitgliedName, setMitgliedName] = useState("Jemand");
   const [meldung, setMeldung] = useState("");
+  const [fehler, setFehler] = useState("");
   const [loading, setLoading] = useState(true);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
@@ -49,34 +51,46 @@ export default function BelohnungenPage() {
   async function ladeBelohnungen() {
     setLoading(true);
     setMeldung("");
+    setFehler("");
 
-    const { data: userData } = await supabase.auth.getUser();
+    const { data: userData, error: userError } = await supabase.auth.getUser();
 
-    if (!userData.user) {
+    if (userError || !userData.user) {
+      setFehler("Du bist nicht eingeloggt.");
       setLoading(false);
       return;
     }
 
     const { data: mitglied, error: mitgliedError } = await supabase
       .from("mitglieder")
-      .select("id, familie_id")
+      .select("id, familie_id, name")
       .eq("auth_user_id", userData.user.id)
-      .single();
+      .maybeSingle();
 
-    if (mitgliedError || !mitglied) {
+    if (mitgliedError) {
       console.error(mitgliedError);
+      setFehler(mitgliedError.message);
+      setLoading(false);
+      return;
+    }
+
+    if (!mitglied) {
+      setFehler(
+        "Dein Login ist noch mit keinem Familienmitglied verbunden. Bitte prüfe Familie/Login."
+      );
       setLoading(false);
       return;
     }
 
     setFamilieId(mitglied.familie_id);
     setMitgliedId(mitglied.id);
+    setMitgliedName(mitglied.name || "Jemand");
 
     const { data: xpData, error: xpError } = await supabase
       .from("familien_xp")
       .select("xp")
       .eq("familie_id", mitglied.familie_id)
-      .single();
+      .maybeSingle();
 
     if (xpError) {
       console.error(xpError);
@@ -92,6 +106,7 @@ export default function BelohnungenPage() {
 
     if (belohnungsError) {
       console.error(belohnungsError);
+      setFehler(belohnungsError.message);
       setLoading(false);
       return;
     }
@@ -142,6 +157,7 @@ export default function BelohnungenPage() {
 
   async function belohnungEinloesen(belohnung: Belohnung) {
     if (!familieId || !mitgliedId) return;
+    if (loadingId) return;
 
     if (familienXP < belohnung.kosten) {
       setMeldung("Noch nicht genug Familien XP für diese Belohnung.");
@@ -190,8 +206,15 @@ export default function BelohnungenPage() {
       return;
     }
 
+    await supabase.from("feed").insert({
+      familie_id: familieId,
+      mitglied_id: mitgliedId,
+      text: `${mitgliedName} hat die Belohnung "${belohnung.titel}" eingelöst`,
+      xp: 0,
+    });
+
     setFamilienXP(neueXP);
-    setMeldung(`🎁 ${belohnung.titel} wurde eingelöst.`);
+    setMeldung(`${belohnung.titel} wurde eingelöst.`);
     setLoadingId(null);
     await ladeBelohnungen();
   }
@@ -204,45 +227,116 @@ export default function BelohnungenPage() {
     });
   }
 
+  const naechsteBelohnung = belohnungen.find(
+    (belohnung) => familienXP < belohnung.kosten
+  );
+
+  const freigeschaltet = belohnungen.filter(
+    (belohnung) => familienXP >= belohnung.kosten
+  ).length;
+
   return (
-    <main className="min-h-screen bg-[#F6F7FB] p-6 pb-28 text-gray-900">
+    <main className="min-h-screen bg-[#F3EEE5] px-4 pb-28 pt-4 text-[#182019]">
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(86,118,87,0.20),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(166,124,82,0.16),transparent_35%)]" />
+
       <div className="mx-auto max-w-md">
-        <div className="mb-6 rounded-[2rem] bg-gradient-to-br from-gray-900 via-slate-800 to-emerald-900 p-6 text-white shadow-xl">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-3xl bg-white/15 text-3xl font-black">
-            Q
+        <header className="mb-4 overflow-hidden rounded-[1.65rem] border border-[#E1D7C7] bg-[#FFF9EF] shadow-[0_12px_35px_rgba(54,42,25,0.08)]">
+          <div className="bg-gradient-to-br from-[#20362B] via-[#294638] to-[#4F5C3A] p-4 text-[#FFF7EA]">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#D8C7A1]">
+                  Questino Familie
+                </p>
+
+                <h1 className="mt-2 text-4xl font-black leading-none tracking-tight">
+                  Belohnungen
+                </h1>
+
+                <p className="mt-2 max-w-[15rem] text-sm leading-5 text-[#F3E8D5]/75">
+                  Verdiente XP werden zu gemeinsamen Erlebnissen.
+                </p>
+              </div>
+
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-2xl font-black shadow-inner">
+                🎁
+              </div>
+            </div>
           </div>
 
-          <h1 className="text-3xl font-black">Belohnungen</h1>
+          {!loading && !fehler && (
+            <div className="grid grid-cols-3 gap-2 p-3">
+              <div className="rounded-2xl bg-[#E7F0E4] p-3 text-[#2F5D43]">
+                <p className="text-xl font-black">{familienXP}</p>
+                <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-[#5E8064]">
+                  XP
+                </p>
+              </div>
 
-          <p className="mt-2 text-sm text-white/70">
-            Verdiente XP werden zu gemeinsamen Erlebnissen.
-          </p>
-        </div>
+              <div className="rounded-2xl bg-[#F3EBDD] p-3">
+                <p className="text-xl font-black">{freigeschaltet}</p>
+                <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-[#8C7655]">
+                  Bereit
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-[#F3EBDD] p-3">
+                <p className="text-xl font-black">{einloesungen.length}</p>
+                <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-[#8C7655]">
+                  Erlebt
+                </p>
+              </div>
+            </div>
+          )}
+        </header>
 
         {loading && (
-          <div className="rounded-3xl bg-white p-6 text-center text-gray-500 shadow">
+          <div className="rounded-[1.45rem] border border-[#E1D7C7] bg-[#FFF9EF] p-5 text-center text-sm text-[#776B5B] shadow-[0_10px_30px_rgba(54,42,25,0.06)]">
             Lade Belohnungen...
           </div>
         )}
 
-        {!loading && (
+        {!loading && fehler && (
+          <div className="rounded-[1.45rem] border border-[#E1D7C7] bg-[#F8E8DD] p-5 text-[#9A3A28] shadow-[0_10px_30px_rgba(54,42,25,0.06)]">
+            <p className="font-black">Belohnungen konnten nicht geladen werden.</p>
+            <p className="mt-2 text-sm">{fehler}</p>
+          </div>
+        )}
+
+        {!loading && !fehler && (
           <>
-            <div className="mb-5 rounded-3xl bg-white p-5 shadow">
-              <p className="text-sm text-gray-500">Familien XP</p>
-              <p className="text-4xl font-black text-emerald-700">
-                {familienXP}
-              </p>
-            </div>
+            {naechsteBelohnung && (
+              <section className="mb-3 rounded-[1.45rem] border border-[#E1D7C7] bg-[#FFF9EF] p-4 shadow-[0_10px_30px_rgba(54,42,25,0.06)]">
+                <p className="text-[10px] font-black uppercase tracking-widest text-[#8C7655]">
+                  Nächster Familienmoment
+                </p>
+
+                <div className="mt-3 flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#F3EBDD] text-xl">
+                    🎁
+                  </div>
+
+                  <div className="min-w-0 flex-1">
+                    <h2 className="truncate text-base font-black">
+                      {naechsteBelohnung.titel}
+                    </h2>
+
+                    <p className="text-sm text-[#776B5B]">
+                      Noch {Math.max(0, naechsteBelohnung.kosten - familienXP)} XP bis dahin
+                    </p>
+                  </div>
+                </div>
+              </section>
+            )}
 
             {meldung && (
-              <div className="mb-5 rounded-3xl bg-white p-4 text-center font-bold text-gray-700 shadow">
+              <div className="mb-3 rounded-[1.45rem] border border-[#E1D7C7] bg-[#EAF5E9] p-4 text-center text-sm font-black text-[#2F6A44] shadow-[0_10px_30px_rgba(54,42,25,0.06)]">
                 {meldung}
               </div>
             )}
 
-            <div className="space-y-4">
+            <section className="space-y-3">
               {belohnungen.map((belohnung) => {
-                const freigeschaltet = familienXP >= belohnung.kosten;
+                const bereit = familienXP >= belohnung.kosten;
                 const progress =
                   belohnung.kosten > 0
                     ? Math.min(
@@ -254,96 +348,132 @@ export default function BelohnungenPage() {
                 return (
                   <div
                     key={belohnung.id}
-                    className="rounded-3xl bg-white p-5 shadow"
+                    className={`rounded-[1.45rem] border p-4 shadow-[0_10px_30px_rgba(54,42,25,0.06)] ${
+                      bereit
+                        ? "border-[#CFE4D0] bg-[#EAF5E9]"
+                        : "border-[#E1D7C7] bg-[#FFF9EF]"
+                    }`}
                   >
-                    <div className="flex justify-between gap-4">
-                      <div>
-                        <h2 className="text-xl font-black">
-                          {belohnung.titel}
-                        </h2>
-                        <p className="mt-1 text-sm text-gray-500">
-                          {belohnung.beschreibung}
-                        </p>
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-xl ${
+                          bereit ? "bg-[#FFF9EF]" : "bg-[#F3EBDD]"
+                        }`}
+                      >
+                        {bereit ? "🎁" : "🔒"}
                       </div>
 
-                      <div className="text-right">
-                        <p className="text-2xl font-black text-emerald-700">
-                          {belohnung.kosten}
-                        </p>
-                        <p className="text-xs text-gray-400">XP</p>
-                      </div>
-                    </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <h2 className="truncate text-base font-black">
+                              {belohnung.titel}
+                            </h2>
 
-                    <div className="mt-4">
-                      <div className="mb-2 flex justify-between text-xs text-gray-500">
-                        <span>
-                          {familienXP} / {belohnung.kosten} XP
-                        </span>
-                        <span>{progress}%</span>
-                      </div>
+                            {belohnung.beschreibung && (
+                              <p className="mt-1 text-sm leading-5 text-[#776B5B]">
+                                {belohnung.beschreibung}
+                              </p>
+                            )}
+                          </div>
 
-                      <div className="h-3 overflow-hidden rounded-full bg-gray-200">
-                        <div
-                          className={`h-3 rounded-full transition-all ${
-                            freigeschaltet
-                              ? "bg-gradient-to-r from-green-400 to-emerald-500"
-                              : "bg-gradient-to-r from-orange-400 to-yellow-400"
+                          <div className="shrink-0 rounded-2xl bg-[#F3EBDD] px-3 py-2 text-sm font-black text-[#2F5D43]">
+                            {belohnung.kosten} XP
+                          </div>
+                        </div>
+
+                        <div className="mt-3">
+                          <div className="mb-1 flex justify-between text-[11px] font-bold text-[#776B5B]">
+                            <span>
+                              {familienXP} / {belohnung.kosten} XP
+                            </span>
+                            <span>{progress}%</span>
+                          </div>
+
+                          <div className="h-2 overflow-hidden rounded-full bg-[#E8DECF]">
+                            <div
+                              className={`h-2 rounded-full transition-all ${
+                                bereit ? "bg-[#4D8A5C]" : "bg-[#C58A43]"
+                              }`}
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => belohnungEinloesen(belohnung)}
+                          disabled={!bereit || loadingId === belohnung.id}
+                          className={`mt-4 w-full rounded-2xl p-3 text-sm font-black transition active:scale-[0.98] disabled:opacity-60 ${
+                            bereit
+                              ? "bg-[#20362B] text-[#FFF7EA]"
+                              : "bg-[#EFE6D8] text-[#8C7655]"
                           }`}
-                          style={{ width: `${progress}%` }}
-                        />
+                        >
+                          {loadingId === belohnung.id
+                            ? "Wird eingelöst..."
+                            : bereit
+                            ? "Einlösen"
+                            : `Noch ${Math.max(
+                                0,
+                                belohnung.kosten - familienXP
+                              )} XP`}
+                        </button>
                       </div>
                     </div>
-
-                    <button
-                      onClick={() => belohnungEinloesen(belohnung)}
-                      disabled={!freigeschaltet || loadingId === belohnung.id}
-                      className={`mt-4 w-full rounded-2xl p-3 font-black transition ${
-                        freigeschaltet
-                          ? "bg-gray-900 text-white active:scale-[0.98]"
-                          : "bg-gray-100 text-gray-400"
-                      }`}
-                    >
-                      {loadingId === belohnung.id
-                        ? "Wird eingelöst..."
-                        : freigeschaltet
-                        ? "🎁 Einlösen"
-                        : "🔒 Noch gesperrt"}
-                    </button>
                   </div>
                 );
               })}
 
               {belohnungen.length === 0 && (
-                <div className="rounded-3xl bg-white p-6 text-center text-gray-500 shadow">
-                  Noch keine Belohnungen angelegt.
+                <div className="rounded-[1.45rem] border border-[#E1D7C7] bg-[#FFF9EF] p-5 text-center text-[#776B5B] shadow-[0_10px_30px_rgba(54,42,25,0.06)]">
+                  <p className="text-3xl">🎁</p>
+                  <p className="mt-2 font-black text-[#182019]">
+                    Noch keine Belohnungen angelegt.
+                  </p>
+                  <p className="mt-1 text-sm">
+                    Lege später gemeinsame Erlebnisse als Belohnungen an.
+                  </p>
                 </div>
               )}
-            </div>
+            </section>
 
-            <section className="mt-5 rounded-3xl bg-white p-5 shadow">
-              <h2 className="mb-4 text-xl font-black">📜 Bereits erlebt</h2>
+            <section className="mt-4 rounded-[1.45rem] border border-[#E1D7C7] bg-[#FFF9EF] p-4 shadow-[0_10px_30px_rgba(54,42,25,0.06)]">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <div>
+                  <h2 className="text-lg font-black">Bereits erlebt</h2>
+                  <p className="text-sm text-[#776B5B]">
+                    Eure eingelösten Familienmomente.
+                  </p>
+                </div>
 
-              <div className="space-y-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#F3EBDD] text-lg">
+                  📜
+                </div>
+              </div>
+
+              <div className="space-y-2">
                 {einloesungen.map((einloesung) => (
                   <div
                     key={einloesung.id}
-                    className="flex items-center justify-between rounded-2xl bg-gray-50 p-4"
+                    className="flex items-center justify-between gap-3 rounded-2xl border border-[#E8DECF] bg-[#FBF4EA] p-3"
                   >
-                    <div>
-                      <p className="font-black">{einloesung.titel}</p>
-                      <p className="text-sm text-gray-500">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-black">
+                        {einloesung.titel}
+                      </p>
+                      <p className="text-xs text-[#776B5B]">
                         {datumFormatieren(einloesung.eingeloest_am)}
                       </p>
                     </div>
 
-                    <p className="font-black text-emerald-700">
+                    <p className="shrink-0 text-sm font-black text-[#2F6A44]">
                       -{einloesung.xp_kosten} XP
                     </p>
                   </div>
                 ))}
 
                 {einloesungen.length === 0 && (
-                  <div className="rounded-2xl bg-gray-50 p-4 text-center text-gray-500">
+                  <div className="rounded-2xl bg-[#FBF4EA] p-4 text-center text-sm text-[#776B5B]">
                     Noch keine Belohnung eingelöst.
                   </div>
                 )}
