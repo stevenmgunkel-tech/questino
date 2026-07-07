@@ -1,30 +1,116 @@
-@import "tailwindcss";
+/* QUESTINO MOBILE FEINSCHLIFF V1
+   In app/globals.css UNTEN anhängen.
+   Wichtig: Kein overflow:hidden für body setzen, damit Scrollen aktiv bleibt.
+*/
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --q-bg: #f3eee5;
+  --q-card: #fff9ef;
+  --q-border: #e1d7c7;
+  --q-forest: #20362b;
+  --q-text: #182019;
+  --q-muted: #776b5b;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--q-bg);
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--q-bg);
+  width: 100%;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  color: var(--q-text);
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-html {
-  overflow-y: scroll;
-  scrollbar-gutter: stable;
+
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar,
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a {
+  touch-action: manipulation;
+}
+
+input,
+textarea,
+select {
+  font-size: 16px;
+  color: var(--q-text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #9c8b74;
+}
+
+main {
+  min-height: 100dvh;
+  padding-left: max(1rem, env(safe-area-inset-left));
+  padding-right: max(1rem, env(safe-area-inset-right));
+}
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  main {
+    padding-bottom: calc(7.25rem + env(safe-area-inset-bottom)) !important;
+  }
+}
+
+/* Mobile: verhindert optisches Ziehen/Quetschen von großen Karten */
+@media (max-width: 430px) {
+  h1 {
+    letter-spacing: -0.04em;
+  }
+
+  .max-w-md {
+    max-width: 100%;
+  }
+}
+
+/* Desktop/Browser-Test: App bleibt wie iPhone-App mittig */
+@media (min-width: 768px) {
+  main > .max-w-md,
+  main > div.max-w-md {
+    width: 100%;
+  }
+}
+
+/* PWA/iOS: angenehmer beim Drücken */
+@media (hover: none) and (pointer: coarse) {
+  a:hover,
+  button:hover {
+    transform: none;
+  }
 }
