@@ -113,3 +113,49 @@ main {
     transform: none;
   }
 }
+/* QUESTINO – DESKTOP SCROLL FIX
+   Unten an app/globals.css anhängen.
+   Fix: Desktop/Browser kann wieder vertikal scrollen.
+   Scrollbars bleiben optisch versteckt.
+*/
+
+html,
+body {
+  height: auto !important;
+  min-height: 100% !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+}
+
+body {
+  position: relative !important;
+}
+
+main {
+  overflow: visible !important;
+}
+
+/* Desktop darf normal scrollen, auch wenn Mobile Overscroll gebremst wird */
+@media (min-width: 768px) {
+  html,
+  body {
+    overflow-y: auto !important;
+    overscroll-behavior-y: auto !important;
+  }
+}
+
+/* Scrollbar optisch weiterhin ausblenden */
+html,
+body,
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+*::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
