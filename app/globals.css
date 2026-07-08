@@ -159,3 +159,13 @@ body::-webkit-scrollbar,
   height: 0;
   display: none;
 }
+/* QUESTINO – BOTTOM NAV V4 SAFE AREA PATCH
+   Unten an app/globals.css anhängen.
+   Gibt dem Content genug Abstand zur höheren Bottom-Bar.
+*/
+
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  main {
+    padding-bottom: calc(8.6rem + env(safe-area-inset-bottom)) !important;
+  }
+}

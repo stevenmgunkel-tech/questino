@@ -52,7 +52,7 @@ export default function AppNav() {
             className="absolute inset-0 h-full w-full"
           />
 
-          <div className="absolute bottom-[calc(5.8rem+env(safe-area-inset-bottom))] left-1/2 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-[1.7rem] border border-[#E1D7C7]/95 bg-[#FFF9EF]/96 p-3 shadow-[0_20px_45px_rgba(54,42,25,0.18)] backdrop-blur-xl">
+          <div className="absolute bottom-[calc(6.6rem+env(safe-area-inset-bottom))] left-1/2 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-[1.7rem] border border-[#E1D7C7]/95 bg-[#FFF9EF]/96 p-3 shadow-[0_20px_45px_rgba(54,42,25,0.18)] backdrop-blur-xl">
             <div className="mb-3 flex items-center justify-between px-1">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#8C7655]">
@@ -104,12 +104,16 @@ export default function AppNav() {
       )}
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50">
-        {/* sehr leichter, kleiner Fade */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(4.95rem+env(safe-area-inset-bottom))] h-7 bg-gradient-to-t from-[#F3EEE5]/38 via-[#F3EEE5]/16 to-transparent" />
+        {/* minimaler Fade, nicht hart */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(6.25rem+env(safe-area-inset-bottom))] h-6 bg-gradient-to-t from-[#F3EEE5]/30 via-[#F3EEE5]/10 to-transparent" />
 
         <nav className="pointer-events-none relative">
           <div className="mx-auto w-[calc(100%-1rem)] max-w-md pointer-events-auto">
-            <div className="rounded-t-[1.7rem] rounded-b-none border-x border-t border-[#E1D7C7]/95 bg-[#FFF9EF]/94 px-2.5 pb-[calc(0.45rem+env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-10px_30px_rgba(54,42,25,0.10)] backdrop-blur-xl">
+            <div className="rounded-t-[1.7rem] rounded-b-none border-x border-t border-[#E1D7C7]/95 bg-[#FFF9EF]/95 px-2.5 pb-[calc(0.85rem+env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-10px_30px_rgba(54,42,25,0.10)] backdrop-blur-xl">
+              <p className="mb-2 text-center text-[10px] font-black uppercase tracking-[0.2em] text-[#8C7655]">
+                Questino · Stark als Familie
+              </p>
+
               <div className="grid grid-cols-6 gap-1.5">
                 {mainItems.map((item) => {
                   const active = istAktiv(item.href);
@@ -118,7 +122,7 @@ export default function AppNav() {
                     <Link
                       key={item.href}
                       href={item.href}
-                      className={`flex min-h-[3.65rem] min-w-0 flex-col items-center justify-center rounded-[1.1rem] px-1 transition active:scale-95 ${
+                      className={`flex min-h-[3.55rem] min-w-0 flex-col items-center justify-center rounded-[1.08rem] px-1 transition active:scale-95 ${
                         active
                           ? "bg-[#20362B] text-[#FFF7EA] shadow-[0_8px_18px_rgba(32,54,43,0.18)]"
                           : "text-[#7A6A54] hover:bg-[#F3EBDD]"
@@ -138,7 +142,7 @@ export default function AppNav() {
                 <button
                   type="button"
                   onClick={() => setMehrOffen((offen) => !offen)}
-                  className={`flex min-h-[3.65rem] min-w-0 flex-col items-center justify-center rounded-[1.1rem] px-1 transition active:scale-95 ${
+                  className={`flex min-h-[3.55rem] min-w-0 flex-col items-center justify-center rounded-[1.08rem] px-1 transition active:scale-95 ${
                     mehrOffen || mehrAktiv
                       ? "bg-[#20362B] text-[#FFF7EA] shadow-[0_8px_18px_rgba(32,54,43,0.18)]"
                       : "text-[#7A6A54] hover:bg-[#F3EBDD]"
