@@ -19,6 +19,7 @@ const mainItems: NavItem[] = [
 ];
 
 const moreItems: NavItem[] = [
+  { href: "/eltern", icon: "👨", label: "Eltern" },
   { href: "/staerken", icon: "◇", label: "Stärken" },
   { href: "/erfolge", icon: "♕", label: "Erfolge" },
   { href: "/belohnungen", icon: "◈", label: "Belohnungen" },
@@ -56,7 +57,7 @@ export default function AppNav() {
             <div className="mb-3 flex items-center justify-between px-1">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#8C7655]">
-                  Questino
+                  Questino · Wachstum für Kinder & Familien
                 </p>
                 <p className="text-lg font-black text-[#182019]">Mehr</p>
               </div>
@@ -153,7 +154,7 @@ export default function AppNav() {
               </div>
 
               <p className="mt-2 text-center text-[10px] font-black uppercase tracking-[0.2em] text-[#8C7655]">
-                Questino · Stark als Familie
+                Questino · Wachstum für Kinder & Familien
               </p>
             </div>
           </div>
