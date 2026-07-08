@@ -104,8 +104,8 @@ export default function AppNav() {
       )}
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50">
-        {/* breiter, weicher Fade: nicht hart direkt an der Rundung */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(6.55rem+env(safe-area-inset-bottom))] h-14 bg-gradient-to-t from-[#F3EEE5]/28 via-[#F3EEE5]/16 to-transparent" />
+        {/* finaler softer Fade: etwas größer, aber deutlich feiner */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(6.45rem+env(safe-area-inset-bottom))] h-20 bg-gradient-to-t from-[#F3EEE5]/24 via-[#F3EEE5]/10 to-transparent" />
 
         <nav className="pointer-events-none relative">
           <div className="mx-auto w-[calc(100%-1rem)] max-w-md pointer-events-auto">
