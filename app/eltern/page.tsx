@@ -1,3 +1,4 @@
+import Link from "next/link";
 import AppNav from "@/components/AppNav";
 
 export default function ElternPage() {
@@ -8,7 +9,8 @@ export default function ElternPage() {
       kind: "Kind 1",
       xp: 10,
       typ: "Mission",
-      farbe: "bg-blue-100",
+      farbe: "bg-[#E7F0E4]",
+      textFarbe: "text-[#2F5D43]",
     },
     {
       icon: "🍫",
@@ -16,7 +18,8 @@ export default function ElternPage() {
       kind: "Kind 1",
       xp: 0,
       typ: "Einkaufswunsch",
-      farbe: "bg-yellow-100",
+      farbe: "bg-[#F6EAD8]",
+      textFarbe: "text-[#8A4D1F]",
     },
     {
       icon: "🎂",
@@ -24,176 +27,218 @@ export default function ElternPage() {
       kind: "Kind 2",
       xp: 0,
       typ: "Termin-Vorschlag",
-      farbe: "bg-purple-100",
+      farbe: "bg-[#E8E4F2]",
+      textFarbe: "text-[#564485]",
     },
   ];
 
   const actions = [
-    { href: "/missionen", icon: "➕", label: "Mission" },
-    { href: "/kalender", icon: "📅", label: "Termin" },
-    { href: "/einkaufsliste", icon: "🛒", label: "Einkauf" },
-    { href: "/belohnungen", icon: "🎁", label: "Reward" },
+    { href: "/missionen", icon: "✦", label: "Mission" },
+    { href: "/kalender", icon: "▤", label: "Termin" },
+    { href: "/einkaufsliste", icon: "☷", label: "Einkauf" },
+    { href: "/belohnungen", icon: "◈", label: "Reward" },
+  ];
+
+  const kpis = [
+    {
+      icon: "⭐",
+      wert: "260 XP",
+      label: "Familie gesamt",
+      farbe: "bg-[#E7F0E4]",
+      textFarbe: "text-[#2F5D43]",
+    },
+    {
+      icon: "🏕️",
+      wert: "62%",
+      label: "Familienziel",
+      farbe: "bg-[#F3EBDD]",
+      textFarbe: "text-[#8C7655]",
+    },
+    {
+      icon: "🎯",
+      wert: "14 / 20",
+      label: "Wochenziel",
+      farbe: "bg-[#F6EAD8]",
+      textFarbe: "text-[#8A4D1F]",
+    },
+    {
+      icon: "👨‍👩‍👧",
+      wert: "3",
+      label: "Mitglieder",
+      farbe: "bg-[#F3EBDD]",
+      textFarbe: "text-[#8C7655]",
+    },
   ];
 
   return (
-    <main className="min-h-screen bg-[#F6F7FB] p-6 pb-28 text-gray-900">
-      <div className="max-w-md mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-3xl bg-gradient-to-br from-slate-800 to-blue-700 text-white flex items-center justify-center text-2xl shadow">
-              👨
-            </div>
+    <main className="min-h-screen bg-[#F3EEE5] px-4 pb-28 pt-4 text-[#182019]">
+      <div className="pointer-events-none fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(86,118,87,0.20),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(166,124,82,0.16),transparent_35%)]" />
 
-            <div>
-              <p className="text-gray-500 font-medium">Kommandozentrale</p>
-              <h1 className="text-3xl font-black leading-none">
-                Eltern
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                Familie Gunkel verwalten
-              </p>
-            </div>
-          </div>
-
-          <a
-            href="/"
-            className="bg-white px-4 py-2 rounded-2xl shadow font-black text-sm"
-          >
-            🧒 Kind
-          </a>
-        </div>
-
-        <div className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-blue-800 to-indigo-700 rounded-[2.2rem] p-6 shadow-2xl text-white mb-5">
-          <div className="absolute -top-16 -right-16 w-40 h-40 bg-white/10 rounded-full"></div>
-          <div className="absolute -bottom-20 -left-16 w-48 h-48 bg-white/10 rounded-full"></div>
-
-          <div className="relative">
-            <div className="flex justify-between items-start mb-6">
+      <div className="mx-auto max-w-md">
+        <header className="mb-4 overflow-hidden rounded-[1.65rem] border border-[#E1D7C7] bg-[#FFF9EF] shadow-[0_12px_35px_rgba(54,42,25,0.08)]">
+          <div className="bg-gradient-to-br from-[#20362B] via-[#294638] to-[#4F5C3A] p-5 text-[#FFF7EA]">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-white/70 font-medium">Heute im Blick</p>
-                <h2 className="text-3xl font-black">3 Freigaben</h2>
-                <p className="text-white/70 text-sm mt-1">
-                  Missionen, Wünsche und Termine warten auf dich.
+                <p className="text-[10px] font-black uppercase tracking-[0.24em] text-[#D8C7A1]">
+                  Kommandozentrale
+                </p>
+
+                <h1 className="mt-3 text-4xl font-black leading-none tracking-tight">
+                  Eltern
+                </h1>
+
+                <p className="mt-3 max-w-[16rem] text-sm leading-6 text-[#F3E8D5]/75">
+                  Familie Gunkel verwalten und den Überblick behalten.
                 </p>
               </div>
 
-              <div className="w-14 h-14 rounded-3xl bg-white/20 flex items-center justify-center text-3xl">
-                ✅
-              </div>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-white/15 rounded-3xl p-3">
-                <p className="text-2xl">🔥</p>
-                <p className="font-black mt-1">3</p>
-                <p className="text-xs text-white/70">Missionen</p>
-              </div>
-
-              <div className="bg-white/15 rounded-3xl p-3">
-                <p className="text-2xl">🛒</p>
-                <p className="font-black mt-1">1</p>
-                <p className="text-xs text-white/70">Wunsch</p>
-              </div>
-
-              <div className="bg-white/15 rounded-3xl p-3">
-                <p className="text-2xl">📅</p>
-                <p className="font-black mt-1">1</p>
-                <p className="text-xs text-white/70">Termin</p>
-              </div>
+              <Link
+                href="/"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-xl font-black shadow-inner active:scale-95"
+              >
+                🧒
+              </Link>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-4 gap-3 mb-5">
+          <div className="grid grid-cols-3 gap-2 p-3">
+            <div className="rounded-2xl bg-[#F8E8DD] p-3 text-[#9A3A28]">
+              <p className="text-xl font-black">3</p>
+              <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-[#B76B55]">
+                Offen
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-[#E7F0E4] p-3 text-[#2F5D43]">
+              <p className="text-xl font-black">3</p>
+              <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-[#5E8064]">
+                Missionen
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-[#F3EBDD] p-3">
+              <p className="text-xl font-black">1</p>
+              <p className="mt-0.5 text-[10px] font-black uppercase tracking-widest text-[#8C7655]">
+                Wunsch
+              </p>
+            </div>
+          </div>
+        </header>
+
+        <section className="mb-3 rounded-[1.45rem] border border-[#E1D7C7] bg-[#FFF9EF] p-4 shadow-[0_10px_30px_rgba(54,42,25,0.06)]">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-[#8C7655]">
+                Heute im Blick
+              </p>
+
+              <h2 className="mt-1 text-2xl font-black">3 Freigaben</h2>
+
+              <p className="mt-1 text-sm leading-5 text-[#776B5B]">
+                Missionen, Wünsche und Termine warten auf dich.
+              </p>
+            </div>
+
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#E7F0E4] text-xl">
+              ✅
+            </div>
+          </div>
+        </section>
+
+        <section className="mb-3 grid grid-cols-4 gap-2">
           {actions.map((item) => (
-            <a
+            <Link
               key={item.label}
               href={item.href}
-              className="bg-white rounded-3xl p-4 shadow flex flex-col items-center justify-center active:scale-95 transition"
+              className="flex min-h-[5.2rem] flex-col items-center justify-center rounded-[1.35rem] border border-[#E1D7C7] bg-[#FFF9EF] p-3 text-center shadow-[0_10px_30px_rgba(54,42,25,0.06)] transition active:scale-[0.98]"
             >
-              <span className="text-2xl mb-2">{item.icon}</span>
-              <span className="text-[11px] font-black text-gray-700 text-center">
+              <span className="text-xl">{item.icon}</span>
+
+              <span className="mt-2 text-[10px] font-black text-[#776B5B]">
                 {item.label}
               </span>
-            </a>
+            </Link>
           ))}
-        </div>
+        </section>
 
-        <div className="bg-white rounded-[2rem] p-5 shadow mb-5">
-          <div className="flex justify-between items-center mb-4">
+        <section className="mb-3 rounded-[1.45rem] border border-[#E1D7C7] bg-[#FFF9EF] p-4 shadow-[0_10px_30px_rgba(54,42,25,0.06)]">
+          <div className="mb-4 flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-xl font-black">Freigaben</h2>
-              <p className="text-sm text-gray-500">
+              <h2 className="text-lg font-black">Freigaben</h2>
+              <p className="text-sm text-[#776B5B]">
                 Entscheide, was übernommen wird.
               </p>
             </div>
 
-            <span className="bg-red-100 text-red-600 text-xs font-black px-3 py-1 rounded-full">
+            <span className="rounded-full bg-[#F8E8DD] px-3 py-1 text-xs font-black text-[#9A3A28]">
               3 offen
             </span>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {freigaben.map((item) => (
               <div
                 key={item.titel}
-                className="border border-gray-100 rounded-3xl p-4"
+                className="rounded-[1.25rem] border border-[#E8DECF] bg-[#FBF4EA] p-3"
               >
-                <div className="flex gap-4 items-start">
+                <div className="flex items-start gap-3">
                   <div
-                    className={`w-12 h-12 rounded-2xl ${item.farbe} flex items-center justify-center text-2xl shrink-0`}
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl ${item.farbe} text-xl`}
                   >
                     {item.icon}
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-black">{item.titel}</h3>
-                    <p className="text-sm text-gray-500">
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate font-black">{item.titel}</h3>
+
+                    <p className="text-sm text-[#776B5B]">
                       {item.typ} · {item.kind}
                       {item.xp > 0 ? ` · +${item.xp} XP` : ""}
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                  <button className="bg-green-500 text-white font-black py-3 rounded-2xl">
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <button className="rounded-2xl bg-[#20362B] py-3 text-sm font-black text-[#FFF7EA] active:scale-[0.98]">
                     Genehmigen
                   </button>
 
-                  <button className="bg-gray-200 text-gray-600 font-black py-3 rounded-2xl">
+                  <button className="rounded-2xl bg-[#EFE6D8] py-3 text-sm font-black text-[#776B5B] active:scale-[0.98]">
                     Ablehnen
                   </button>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="grid grid-cols-2 gap-4 mb-5">
-          <div className="bg-white rounded-3xl p-5 shadow">
-            <p className="text-3xl mb-2">⭐</p>
-            <p className="font-black">260 XP</p>
-            <p className="text-sm text-gray-500">Familie gesamt</p>
+        <section>
+          <div className="mb-3">
+            <h2 className="text-lg font-black">Familienübersicht</h2>
+            <p className="text-sm text-[#776B5B]">
+              Die wichtigsten Zahlen auf einen Blick.
+            </p>
           </div>
 
-          <div className="bg-white rounded-3xl p-5 shadow">
-            <p className="text-3xl mb-2">🏕️</p>
-            <p className="font-black">62%</p>
-            <p className="text-sm text-gray-500">Familienziel</p>
-          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {kpis.map((item) => (
+              <div
+                key={item.label}
+                className="rounded-[1.45rem] border border-[#E1D7C7] bg-[#FFF9EF] p-4 shadow-[0_10px_30px_rgba(54,42,25,0.06)]"
+              >
+                <div
+                  className={`mb-3 flex h-10 w-10 items-center justify-center rounded-2xl ${item.farbe} text-xl`}
+                >
+                  {item.icon}
+                </div>
 
-          <div className="bg-white rounded-3xl p-5 shadow">
-            <p className="text-3xl mb-2">🎯</p>
-            <p className="font-black">14 / 20</p>
-            <p className="text-sm text-gray-500">Wochenziel</p>
-          </div>
+                <p className={`font-black ${item.textFarbe}`}>{item.wert}</p>
 
-          <div className="bg-white rounded-3xl p-5 shadow">
-            <p className="text-3xl mb-2">👨‍👩‍👧</p>
-            <p className="font-black">3</p>
-            <p className="text-sm text-gray-500">Mitglieder</p>
+                <p className="mt-1 text-sm text-[#776B5B]">{item.label}</p>
+              </div>
+            ))}
           </div>
-        </div>
+        </section>
       </div>
 
       <AppNav />
