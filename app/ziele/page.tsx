@@ -40,7 +40,7 @@ export default function ZielePage() {
   const [loading, setLoading] = useState(false);
   const [seiteLaedt, setSeiteLaedt] = useState(true);
   const [fehler, setFehler] = useState("");
-  const [formularOffen, setFormularOffen] = useState(true);
+  const [formularOffen, setFormularOffen] = useState(false);
   const [loadingZielId, setLoadingZielId] = useState<string | null>(null);
 
   const [achievementQueue, setAchievementQueue] = useState<
@@ -363,7 +363,7 @@ export default function ZielePage() {
           onClick={() => setFormularOffen((offen) => !offen)}
           className="mb-4 w-full rounded-[1.45rem] border border-[#E1D7C7] bg-[#FFF9EF] p-4 text-center font-black shadow-[0_10px_30px_rgba(54,42,25,0.06)] active:scale-[0.99]"
         >
-          {formularOffen ? "Ziel-Formular schließen" : "+ Neues Ziel"}
+          {formularOffen ? "Ziel schließen" : "+ Ziel erstellen"}
         </button>
 
         {formularOffen && !fehler && (

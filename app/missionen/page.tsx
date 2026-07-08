@@ -51,7 +51,7 @@ export default function MissionenPage() {
   const [seiteLaedt, setSeiteLaedt] = useState(true);
   const [fehler, setFehler] = useState("");
 
-  const [formularOffen, setFormularOffen] = useState(true);
+  const [formularOffen, setFormularOffen] = useState(false);
   const [selectedStaerken, setSelectedStaerken] = useState<string[]>([]);
   const [familienwerte, setFamilienwerte] = useState<Familienwert[]>([]);
   const [selectedFamilienwerte, setSelectedFamilienwerte] = useState<string[]>(
@@ -482,7 +482,7 @@ export default function MissionenPage() {
           onClick={() => setFormularOffen((offen) => !offen)}
           className="mb-4 w-full rounded-[1.45rem] border border-[#E1D7C7] bg-[#FFF9EF] p-4 text-center font-black shadow-[0_10px_30px_rgba(54,42,25,0.06)] active:scale-[0.99]"
         >
-          {formularOffen ? "Mission-Formular schließen" : "+ Neue Mission"}
+          {formularOffen ? "Mission schließen" : "+ Mission erstellen"}
         </button>
 
         {formularOffen && !fehler && (

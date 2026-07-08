@@ -63,7 +63,7 @@ export default function RoutinenPage() {
   const [loadingCreate, setLoadingCreate] = useState(false);
   const [seiteLaedt, setSeiteLaedt] = useState(true);
   const [fehler, setFehler] = useState("");
-  const [formularOffen, setFormularOffen] = useState(true);
+  const [formularOffen, setFormularOffen] = useState(false);
 
   const [achievementQueue, setAchievementQueue] = useState<
     FreigeschaltetesAchievement[]
@@ -530,7 +530,7 @@ export default function RoutinenPage() {
           onClick={() => setFormularOffen((offen) => !offen)}
           className="mb-4 w-full rounded-[1.45rem] border border-[#E1D7C7] bg-[#FFF9EF] p-4 text-center font-black shadow-[0_10px_30px_rgba(54,42,25,0.06)] active:scale-[0.99]"
         >
-          {formularOffen ? "Routine-Formular schließen" : "+ Neue Routine"}
+          {formularOffen ? "Routine schließen" : "+ Routine erstellen"}
         </button>
 
         {formularOffen && !fehler && (
