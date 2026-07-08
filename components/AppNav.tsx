@@ -45,14 +45,14 @@ export default function AppNav() {
   return (
     <>
       {mehrOffen && (
-        <div className="fixed inset-0 z-40 bg-[#182019]/24 backdrop-blur-[3px]">
+        <div className="fixed inset-0 z-40 bg-[#182019]/18 backdrop-blur-[2px]">
           <button
             aria-label="Menü schließen"
             onClick={() => setMehrOffen(false)}
             className="absolute inset-0 h-full w-full"
           />
 
-          <div className="absolute bottom-[calc(6.6rem+env(safe-area-inset-bottom))] left-1/2 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-[1.8rem] border border-[#E1D7C7]/95 bg-[#FFF9EF]/96 p-3 shadow-[0_24px_55px_rgba(54,42,25,0.22)] backdrop-blur-2xl">
+          <div className="absolute bottom-[calc(5.8rem+env(safe-area-inset-bottom))] left-1/2 w-[calc(100%-1rem)] max-w-md -translate-x-1/2 rounded-[1.7rem] border border-[#E1D7C7]/95 bg-[#FFF9EF]/96 p-3 shadow-[0_20px_45px_rgba(54,42,25,0.18)] backdrop-blur-xl">
             <div className="mb-3 flex items-center justify-between px-1">
               <div>
                 <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#8C7655]">
@@ -104,50 +104,53 @@ export default function AppNav() {
       )}
 
       <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50">
-        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(5.7rem+env(safe-area-inset-bottom))] h-20 bg-gradient-to-t from-[#F3EEE5]/95 via-[#F3EEE5]/58 to-transparent backdrop-blur-[5px]" />
+        {/* sehr leichter, kleiner Fade */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-[calc(4.95rem+env(safe-area-inset-bottom))] h-7 bg-gradient-to-t from-[#F3EEE5]/38 via-[#F3EEE5]/16 to-transparent" />
 
         <nav className="pointer-events-none relative">
-          <div className="mx-auto mb-[max(0.7rem,env(safe-area-inset-bottom))] w-[calc(100%-1rem)] max-w-md rounded-[1.65rem] border border-[#E1D7C7]/95 bg-[#FFF9EF]/90 p-2.5 shadow-[0_18px_40px_rgba(54,42,25,0.20)] backdrop-blur-2xl pointer-events-auto">
-            <div className="grid grid-cols-6 gap-1.5">
-              {mainItems.map((item) => {
-                const active = istAktiv(item.href);
+          <div className="mx-auto w-[calc(100%-1rem)] max-w-md pointer-events-auto">
+            <div className="rounded-t-[1.7rem] rounded-b-none border-x border-t border-[#E1D7C7]/95 bg-[#FFF9EF]/94 px-2.5 pb-[calc(0.45rem+env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-10px_30px_rgba(54,42,25,0.10)] backdrop-blur-xl">
+              <div className="grid grid-cols-6 gap-1.5">
+                {mainItems.map((item) => {
+                  const active = istAktiv(item.href);
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`flex min-h-[4rem] min-w-0 flex-col items-center justify-center rounded-[1.15rem] px-1 transition active:scale-95 ${
-                      active
-                        ? "bg-[#20362B] text-[#FFF7EA] shadow-[0_10px_20px_rgba(32,54,43,0.22)]"
-                        : "text-[#7A6A54] hover:bg-[#F3EBDD]"
-                    }`}
-                  >
-                    <span className="text-[1.12rem] leading-none">
-                      {item.icon}
-                    </span>
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`flex min-h-[3.65rem] min-w-0 flex-col items-center justify-center rounded-[1.1rem] px-1 transition active:scale-95 ${
+                        active
+                          ? "bg-[#20362B] text-[#FFF7EA] shadow-[0_8px_18px_rgba(32,54,43,0.18)]"
+                          : "text-[#7A6A54] hover:bg-[#F3EBDD]"
+                      }`}
+                    >
+                      <span className="text-[1.08rem] leading-none">
+                        {item.icon}
+                      </span>
 
-                    <span className="mt-1.5 max-w-full truncate text-[9px] font-black leading-none">
-                      {item.label}
-                    </span>
-                  </Link>
-                );
-              })}
+                      <span className="mt-1 max-w-full truncate text-[9px] font-black leading-none">
+                        {item.label}
+                      </span>
+                    </Link>
+                  );
+                })}
 
-              <button
-                type="button"
-                onClick={() => setMehrOffen((offen) => !offen)}
-                className={`flex min-h-[4rem] min-w-0 flex-col items-center justify-center rounded-[1.15rem] px-1 transition active:scale-95 ${
-                  mehrOffen || mehrAktiv
-                    ? "bg-[#20362B] text-[#FFF7EA] shadow-[0_10px_20px_rgba(32,54,43,0.22)]"
-                    : "text-[#7A6A54] hover:bg-[#F3EBDD]"
-                }`}
-              >
-                <span className="text-[1.12rem] leading-none">☰</span>
+                <button
+                  type="button"
+                  onClick={() => setMehrOffen((offen) => !offen)}
+                  className={`flex min-h-[3.65rem] min-w-0 flex-col items-center justify-center rounded-[1.1rem] px-1 transition active:scale-95 ${
+                    mehrOffen || mehrAktiv
+                      ? "bg-[#20362B] text-[#FFF7EA] shadow-[0_8px_18px_rgba(32,54,43,0.18)]"
+                      : "text-[#7A6A54] hover:bg-[#F3EBDD]"
+                  }`}
+                >
+                  <span className="text-[1.08rem] leading-none">☰</span>
 
-                <span className="mt-1.5 max-w-full truncate text-[9px] font-black leading-none">
-                  Mehr
-                </span>
-              </button>
+                  <span className="mt-1 max-w-full truncate text-[9px] font-black leading-none">
+                    Mehr
+                  </span>
+                </button>
+              </div>
             </div>
           </div>
         </nav>
